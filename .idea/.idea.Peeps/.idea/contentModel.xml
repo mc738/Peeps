@@ -7,6 +7,7 @@
     <e p="$APPLICATION_CONFIG_DIR$/extensions" t="IncludeRecursive" />
     <e p="$APPLICATION_CONFIG_DIR$/scratches" t="IncludeRecursive" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p="Documentation" t="Include" />
       <e p="Peeps" t="IncludeRecursive">
         <e p="Logger.fs" t="Include" />
         <e p="Peeps.fsproj" t="IncludeRecursive" />
@@ -14,6 +15,8 @@
         <e p="obj" t="ExcludeRecursive" />
       </e>
       <e p="Peeps.sln" t="IncludeFlat" />
+      <e p="README.md" t="Include" />
+      <e p="TODO.md" t="Include" />
       <e p="packages" t="ExcludeRecursive" />
     </e>
   </component>
