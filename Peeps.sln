@@ -8,6 +8,14 @@ ProjectSection(SolutionItems) = preProject
 	TODO.md = TODO.md
 EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.TestConsole", "Peeps.TestConsole\Peeps.TestConsole.fsproj", "{E0B42CFC-3E40-43ED-B38A-E357BCADA5E8}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.TestWebApi", "Peeps.TestWebApi\Peeps.TestWebApi.fsproj", "{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{0935A32C-DA6A-410D-85FF-A2D2B853BC0C}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Froq", "..\Froq\Froq.Core\Froq.fsproj", "{8E5057E9-F9FC-4AB6-938B-66C11C879FEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +26,20 @@ Global
 		{EB3641A0-2C1B-41F9-AC48-F9FA6044BA48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB3641A0-2C1B-41F9-AC48-F9FA6044BA48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB3641A0-2C1B-41F9-AC48-F9FA6044BA48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0B42CFC-3E40-43ED-B38A-E357BCADA5E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0B42CFC-3E40-43ED-B38A-E357BCADA5E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0B42CFC-3E40-43ED-B38A-E357BCADA5E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0B42CFC-3E40-43ED-B38A-E357BCADA5E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E5057E9-F9FC-4AB6-938B-66C11C879FEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E5057E9-F9FC-4AB6-938B-66C11C879FEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E5057E9-F9FC-4AB6-938B-66C11C879FEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E5057E9-F9FC-4AB6-938B-66C11C879FEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8E5057E9-F9FC-4AB6-938B-66C11C879FEB} = {0935A32C-DA6A-410D-85FF-A2D2B853BC0C}
 	EndGlobalSection
 EndGlobal

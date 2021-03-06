@@ -2,13 +2,14 @@ namespace Peeps
 
 open System
 
+[<Obsolete("Old api")>]
 type LogItem =
     { from: string
       message: string
       time: DateTime
       ``type``: ItemType }
 
-and ItemType =
+and [<Obsolete("Old api")>] ItemType =
     | Success
     | Error
     | Information
@@ -16,7 +17,7 @@ and ItemType =
     | Debug
 
 /// A basic logging class.
-type Logger() =
+type [<Obsolete("Old api")>] Logger() =
 
     let getCCT itemType =
         match itemType with
