@@ -18,7 +18,7 @@ open Peeps.Sqlite
 
 2. Create a `PeepsContext`
 ```fsharp
-let peepsCtx = PeepsContext.Create("/home/max/Data/logs", "Test")
+let peepsCtx = PeepsContext.Create("/output/directory/path", "name")
 ```
 
 3. Configure logging:
@@ -28,7 +28,7 @@ logging.ClearProviders() |> ignore
 logging.AddPeeps(peepsCtx) |> ignore
 ```
 
-4. Add logging to `ASP.Net core` requst pipeline:
+4. Add logging to request pipeline:
 ```fsharp
 Host
     .CreateDefaultBuilder()
