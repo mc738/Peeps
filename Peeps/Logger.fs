@@ -17,7 +17,8 @@ and [<Obsolete("Old api")>] ItemType =
     | Debug
 
 /// A basic logging class.
-type [<Obsolete("Old api")>] Logger() =
+[<Obsolete("Old api")>]
+type Logger() =
 
     let getCCT itemType =
         match itemType with
@@ -27,7 +28,7 @@ type [<Obsolete("Old api")>] Logger() =
         | Warning -> (ConsoleColor.Yellow, "WARN")
         | Debug -> (ConsoleColor.Magenta, "DEBUG")
 
-    let handleItem item = 
+    let handleItem item =
         let (color, title) = getCCT item.``type``
         Console.ForegroundColor <- color
         printf "%s\t" title
@@ -35,20 +36,20 @@ type [<Obsolete("Old api")>] Logger() =
         let time = item.time.ToString()
         printfn "[%s] %s: %s" time item.from item.message
         true
- 
+
     let listener =
         MailboxProcessor<LogItem>
             .Start(fun inbox ->
-                  let rec loop () =
-                      async {
+                let rec loop () =
+                    async {
 
-                          let! item = inbox.Receive()
+                        let! item = inbox.Receive()
 
-                          let cont = handleItem item
+                        let cont = handleItem item
 
-                          if cont then return! loop ()
-                      }
+                        if cont then return! loop ()
+                    }
 
-                  loop ())
- 
+                loop ())
+
     member this.Post item = listener.Post item

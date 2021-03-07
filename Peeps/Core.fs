@@ -3,9 +3,7 @@ module Peeps.Core
 open System
 open Microsoft.Extensions.Logging
 
-type PeepsSettings = {
-    OutputDirectory: string
-}
+type PeepsSettings = { OutputDirectory: string }
 
 type PeepsConsoleColor =
     | Black
@@ -26,7 +24,7 @@ type PeepsConsoleColor =
     | BrightWhite
     | Custom
     | Reset
-        
+
     member color.Foreground =
         match color with
         | Black -> "\u001b[30m"
@@ -47,7 +45,7 @@ type PeepsConsoleColor =
         | BrightWhite -> "\u001b[37;1m"
         | Custom -> failwith "Not implemented."
         | Reset -> "\u001b[0m"
-        
+
     member color.Background =
         match color with
         | Black -> "\u001b[40m"
@@ -79,7 +77,7 @@ type LogItemType =
     | Error
     | Warning
     | Critical
-    
+
     static member FromLogLevel(level: LogLevel) =
         match level with
         | LogLevel.Critical -> LogItemType.Critical
@@ -90,7 +88,7 @@ type LogItemType =
         | LogLevel.Trace -> LogItemType.Trace
         | LogLevel.Warning -> LogItemType.Warning
         | _ -> LogItemType.Warning
-        
+
     member itemType.ConsoleColor =
         match itemType with
         | Information -> PeepsConsoleColor.BrightWhite
@@ -105,11 +103,12 @@ and PeepsLogItem =
       From: string
       Message: string
       ItemType: LogItemType }
-    
-    static member Create(level : LogLevel, from : string, message : string) =
+
+    static member Create(level: LogLevel, from: string, message: string) =
         { TimeUtc = DateTime.UtcNow
           From = from
           Message = message
           ItemType = LogItemType.FromLogLevel level }
-        
-    member item.Rendered = item.ItemType.ConsoleColor.ForegroundText item.Message
+
+    member item.Rendered =
+        item.ItemType.ConsoleColor.ForegroundText item.Message

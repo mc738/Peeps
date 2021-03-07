@@ -8,16 +8,17 @@ open Microsoft.Extensions.Logging
 open Peeps.PeepsLogger
 open Peeps.Extensions
 
-let createHostBuilder(args) =
-   Host.CreateDefaultBuilder(args)
-       .ConfigureLogging(fun logging ->
-           logging.ClearProviders() |> ignore
-           logging.AddPeeps() |> ignore)
+let createHostBuilder (args) =
+    Host
+        .CreateDefaultBuilder(args)
+        .ConfigureLogging(fun logging ->
+            logging.ClearProviders() |> ignore
+            logging.AddPeeps() |> ignore)
 
 [<EntryPoint>]
 let main argv =
     let host = createHostBuilder argv
-    
+
     host.Build().Run()
 
     printfn "Hello World from F#!"
