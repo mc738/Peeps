@@ -1,10 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageVersion>0.1.0</PackageVersion>
+        <TargetFramework>net5.0</TargetFramework>
+        <PackageVersion>0.2.0</PackageVersion>
         <Authors>Max Clifford</Authors>
         <Description>A simple F# loggger.</Description>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageProjectUrl>https://github.com/mc738/Peeps</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/mc738/Peeps</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

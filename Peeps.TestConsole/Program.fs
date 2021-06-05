@@ -12,8 +12,8 @@ let createHostBuilder (args) =
     Host
         .CreateDefaultBuilder(args)
         .ConfigureLogging(fun logging ->
-            logging.ClearProviders() |> ignore
-            logging.AddPeeps() |> ignore)
+            logging.ClearProviders() |> ignore)
+            //logging.AddPeeps() |> ignore)
 
 [<EntryPoint>]
 let main argv =

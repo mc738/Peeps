@@ -42,7 +42,7 @@ type LoggerConfig =
 type Logger(name: string, config: LoggerConfig) =
 
     interface ILogger with
-        member this.BeginScope(state) = failwith "todo"
+        member this.BeginScope(state) = Unchecked.defaultof<IDisposable>
         member this.IsEnabled(logLevel) = logLevel = config.LogLevel
 
         member this.Log(logLevel, eventId, state, ``exception``, formatter) =
