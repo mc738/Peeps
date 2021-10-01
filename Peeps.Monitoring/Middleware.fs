@@ -44,3 +44,25 @@ module Middleware =
             }
             |> Async.StartAsTask
             :> Task
+            
+    type PeepsLiveViewMiddleware(next: RequestDelegate) =
+        member _.Invoke(ctx: HttpContext) =
+            async {
+                if ctx.Request.Path = PathString("/log/live") then
+                    match ctx.WebSockets.IsWebSocketRequest with
+                    | true ->
+                        use! webSocket = ctx.WebSockets.AcceptWebSocketAsync() |> Async.AwaitTask
+                        LiveView.sockets <- LiveView.addSocket LiveView.sockets webSocket                                    
+                        printfn $"Socket state: {webSocket.State}"
+                        let buffer: byte array = Array.zeroCreate 4096
+                        //do! Async.Sleep 5000
+                        let! ct = Async.CancellationToken
+
+                        while true do
+                            // Needed?
+                            do! Async.Sleep 1000
+                            
+                    | false -> ctx.Response.StatusCode <- 400
+                else
+                    return! next.Invoke(ctx) |> Async.AwaitTask
+            } |> Async.StartAsTask :> Task

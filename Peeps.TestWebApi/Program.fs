@@ -21,7 +21,6 @@ open Peeps.Monitoring
 open Peeps.Monitoring.HealthChecks
 open Peeps.Logger
 open Peeps.Sqlite
-open Peeps.LiveView
 
 [<RequireQualifiedAccess>]
 module Routes =
@@ -114,7 +113,7 @@ let main argv =
                Type = t
                DateTime = item.TimeUtc }: Actions.Message)
 
-        LiveView.Middleware.sendMessageToSockets (System.Text.Json.JsonSerializer.Serialize message)
+        LiveView.sendMessageToSockets (System.Text.Json.JsonSerializer.Serialize message)
         |> Async.RunSynchronously
 
     let dbWriter =

@@ -14,8 +14,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.TestWebApi", "Peeps.T
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{0935A32C-DA6A-410D-85FF-A2D2B853BC0C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.LiveView", "Peeps.LiveView\Peeps.LiveView.fsproj", "{52C0949E-01BE-4496-9DE2-264F48EFF097}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Monitoring", "Peeps.Monitoring\Peeps.Monitoring.fsproj", "{8D5F2864-28D1-47C9-98D3-24889F02324A}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freql.Sqlite", "..\Freql\Freql.Sqlite\Freql.Sqlite.fsproj", "{76ECB00B-E603-4B2A-9B68-190772E53C7E}"
@@ -38,10 +36,6 @@ Global
 		{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}.Release|Any CPU.Build.0 = Release|Any CPU
-		{52C0949E-01BE-4496-9DE2-264F48EFF097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{52C0949E-01BE-4496-9DE2-264F48EFF097}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{52C0949E-01BE-4496-9DE2-264F48EFF097}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{52C0949E-01BE-4496-9DE2-264F48EFF097}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8D5F2864-28D1-47C9-98D3-24889F02324A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8D5F2864-28D1-47C9-98D3-24889F02324A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D5F2864-28D1-47C9-98D3-24889F02324A}.Release|Any CPU.ActiveCfg = Release|Any CPU

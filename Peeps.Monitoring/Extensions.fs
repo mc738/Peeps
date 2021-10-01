@@ -42,9 +42,12 @@ module Extensions =
         
         member builder.UsePeepsMonitor() = builder.UseMiddleware<PeepsMonitorMiddleware>()
         
+        member builder.UsePeepsLiveView() =
+            builder
+                .UseWebSockets()
+                .UseMiddleware<PeepsLiveViewMiddleware>()
+        
     type IServiceCollection with
         
         member builder.AddPeepsMonitorAgent(path) =
             builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path))
-    
-
