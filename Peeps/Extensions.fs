@@ -2,7 +2,6 @@ namespace Peeps.Extensions
 
 open Microsoft.Extensions.Logging
 open Peeps.Logger
-open Peeps.Sqlite
 
 [<AutoOpen>]
 module LoggingBuilder =
