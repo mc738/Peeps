@@ -26,7 +26,6 @@ module Extensions =
                     PeepsUptimeHealthCheck.Tags,
                     args = [| maxRunTimeMinutes; startTime |])
             
-    
     type IApplicationBuilder with
         
         member builder.UsePeepsHealthChecks() =
@@ -42,4 +41,10 @@ module Extensions =
                 ep.MapHealthChecks("/health/full", fullOptions) |> ignore)
         
         member builder.UsePeepsMonitor() = builder.UseMiddleware<PeepsMonitorMiddleware>()
+        
+    type IServiceCollection with
+        
+        member builder.AddPeepsMonitorAgent(path) =
+            builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path))
+    
 

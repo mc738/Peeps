@@ -74,6 +74,8 @@ let webApp =
              route "/warning" >=> Routes.warn ]
 
 let configureApp (app: IApplicationBuilder) =
+    app.UseDeveloperExceptionPage() |> ignore
+
     app.UsePeepsMonitor()
        .UsePeepsLiveView()
        .UseRouting()
@@ -81,7 +83,9 @@ let configureApp (app: IApplicationBuilder) =
        .UseGiraffe webApp
 
 let configureServices (services: IServiceCollection) =
-    services.AddGiraffe() |> ignore
+    services
+        .AddPeepsMonitorAgent("")
+        .AddGiraffe() |> ignore
     
     services.AddHealthChecks()
             .AddPeepsHealthChecks(5000000L, 1000, DateTime.UtcNow)
