@@ -1,10 +1,15 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
+open System.Diagnostics
+open System.Diagnostics
 open System.Net.Http
+open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
+open Microsoft.AspNetCore.Diagnostics.HealthChecks
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Diagnostics.HealthChecks
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
@@ -12,6 +17,8 @@ open Giraffe
 open Peeps
 open Peeps.Core
 open Peeps.Extensions
+open Peeps.Monitoring
+open Peeps.Monitoring.HealthChecks
 open Peeps.Logger
 open Peeps.Sqlite
 open Peeps.LiveView
@@ -23,9 +30,11 @@ module Routes =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             let logger = ctx.GetLogger("Test")
             use scope = logger.BeginScope("test", "")
+            let corrRef = ctx.Items.["corr_ref"] :?> Guid
 
 
             logger.LogInformation "Hello, from info"
+            logger.LogInformation $"Correlation ref: {corrRef}"
 
             text "Info" next ctx
 
@@ -65,9 +74,18 @@ let webApp =
              route "/warning" >=> Routes.warn ]
 
 let configureApp (app: IApplicationBuilder) =
-    app.UsePeepsLiveView().UseGiraffe webApp
+    app.UsePeepsMonitor()
+       .UsePeepsLiveView()
+       .UseRouting()
+       .UsePeepsHealthChecks()
+       .UseGiraffe webApp
 
-let configureServices (services: IServiceCollection) = services.AddGiraffe() |> ignore
+let configureServices (services: IServiceCollection) =
+    services.AddGiraffe() |> ignore
+    
+    services.AddHealthChecks()
+            .AddPeepsHealthChecks(5000000L, 1000, DateTime.UtcNow)
+            |> ignore
 
 let configureLogging (peepsCtx: PeepsContext) (logging: ILoggingBuilder) =
     logging.ClearProviders() |> ignore
