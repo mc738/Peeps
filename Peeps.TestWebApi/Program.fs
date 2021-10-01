@@ -20,7 +20,9 @@ module Routes =
     let info: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             let logger = ctx.GetLogger("Test")
-
+            use scope = logger.BeginScope("test", "")
+            
+            
             logger.LogInformation "Hello, from info"
 
             text "Info" next ctx
@@ -71,7 +73,7 @@ let configureLogging (peepsCtx: PeepsContext) (logging: ILoggingBuilder) =
 [<EntryPoint>]
 let main argv =
     // Set up the Peeps context.
-    let peepsCtx = PeepsContext.Create("/home/max/Data/logs", "Test")
+    let peepsCtx = PeepsContext.Create(AppContext.BaseDirectory, "Test")
     Host
         .CreateDefaultBuilder()
         .ConfigureWebHostDefaults(fun webHostBuilder ->

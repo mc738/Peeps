@@ -60,7 +60,9 @@ type Logger(name: string, config: LoggerConfig) =
 
                 let item =
                     PeepsLogItem.Create(logLevel, name, message)
-
+                
+                // TODO add list of extensions "todo". Peeps item -> unit.
+                
                 printfn "%s" item.Rendered
                 config.DbWriter.Write(item)
 
