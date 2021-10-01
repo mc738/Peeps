@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Peeps.LiveView\Peeps.LiveView.fsproj" />
       <ProjectReference Include="..\Peeps\Peeps.fsproj" />
     </ItemGroup>
 

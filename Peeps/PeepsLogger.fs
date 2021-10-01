@@ -7,6 +7,7 @@ open Peeps
 open Peeps.Core
 open Peeps.Sqlite
 
+[<Obsolete("Use `Logger` instead.")>]
 type LoggerConfig =
     { EventId: int
       LogLevel: LogLevel
@@ -38,7 +39,7 @@ type LoggerConfig =
     static member CriticalConfig(dbWriter, eventId) =
         LoggerConfig.Create(LogLevel.Critical, dbWriter, eventId)
 
-
+[<Obsolete("Use `Logger` instead.")>]
 type Logger(name: string, config: LoggerConfig) =
 
     interface ILogger with
@@ -68,6 +69,7 @@ type Logger(name: string, config: LoggerConfig) =
 
             | false -> () // Do nothing.
 
+[<Obsolete("Use `Logger` instead.")>]
 type LoggerProvider(config: LoggerConfig) =
 
     let mutable _loggers = ConcurrentDictionary<string, Logger>()
@@ -78,7 +80,7 @@ type LoggerProvider(config: LoggerConfig) =
 
         member this.Dispose() = _loggers.Clear()
 
-
+[<Obsolete("Use `Logger` instead.")>]
 type PeepsContext =
     { Name: string
       OutputDirectory: string

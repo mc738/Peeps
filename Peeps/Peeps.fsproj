@@ -16,6 +16,7 @@
         <Compile Include="Sqlite.fs" />
         <Compile Include="PeepsLogger.fs" />
         <Compile Include="Extensions.fs" />
+        <Compile Include="Actions.fs" />
     </ItemGroup>
 
     <ItemGroup>
