@@ -13,5 +13,6 @@ module LoggingBuilder =
               LoggerConfig.DebugConfig(ctx.Actions, 0)
               LoggerConfig.TraceConfig(ctx.Actions, 0)
               LoggerConfig.WarningConfig(ctx.Actions, 0)
-              LoggerConfig.ErrorConfig(ctx.Actions, 0) ]
+              LoggerConfig.ErrorConfig(ctx.Actions, 0)
+              LoggerConfig.CriticalConfig(ctx.Actions, 0) ]
             |> List.fold (fun (b: ILoggingBuilder) config -> b.AddProvider(new LoggerProvider(config))) builder

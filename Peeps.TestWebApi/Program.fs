@@ -20,6 +20,7 @@ open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Monitoring.HealthChecks
 open Peeps.Logger
+open Giraffe.Middleware
 open Peeps.Sqlite
 
 [<RequireQualifiedAccess>]
@@ -63,6 +64,9 @@ module Routes =
             logger.LogWarning "Hello, from warning"
 
             text "Warn" next ctx
+            
+    let fail: HttpHandler =
+        fun (next: HttpFunc) (ctx: HttpContext) -> failwith "Unhandled exception."
 
 
 let webApp =
@@ -70,11 +74,15 @@ let webApp =
              route "/info" >=> Routes.info
              route "/debug" >=> Routes.debug
              route "/error" >=> Routes.error
-             route "/warning" >=> Routes.warn ]
+             route "/warning" >=> Routes.warn
+             route "/fail" >=> Routes.fail ]
 
 let configureApp (app: IApplicationBuilder) =
-    app.UseDeveloperExceptionPage() |> ignore
-
+    
+    //if env.IsDevelopment() then
+    //    app.UseDeveloperExceptionPage() |> ignore
+    //env.ConfigureAppConfiguration(fun ctx cfg -> ctx.HostingEnvironment)
+    
     app.UsePeepsMonitor()
        .UsePeepsLiveView()
        .UseRouting()
@@ -83,7 +91,8 @@ let configureApp (app: IApplicationBuilder) =
 
 let configureServices (services: IServiceCollection) =
     services
-        .AddPeepsMonitorAgent("")
+        //.UseGiraffeErrorHandler(errorHandler)
+        .AddPeepsMonitorAgent("C:\\ProjectData\\WSTest")
         .AddGiraffe() |> ignore
     
     services.AddHealthChecks()

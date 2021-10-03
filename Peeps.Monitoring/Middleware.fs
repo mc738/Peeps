@@ -5,6 +5,7 @@ open System.Diagnostics
 open System.Threading.Tasks
 open Microsoft.AspNetCore.Http
 open Giraffe
+open Microsoft.Extensions.Logging
 
 module Middleware =
 
@@ -27,7 +28,15 @@ module Middleware =
                 )
 
                 ctx.Items.Add("corr_ref", corrRef)
-                do! next.Invoke(ctx) |> Async.AwaitTask
+
+                try
+                    do! next.Invoke(ctx) |> Async.AwaitTask
+                with
+                | ex ->
+                    let logger = ctx.GetLogger("peeps-monitor")
+                    logger.LogCritical($"Unhandled exception in route '{ctx.GetRequestUrl()}'. Error: {ex.Message}")
+                    ctx.Response.StatusCode <- 500
+
                 stopwatch.Stop()
 
                 ma.SaveResponse(
@@ -38,21 +47,21 @@ module Middleware =
                     ctx.Response.StatusCode,
                     stopwatch.ElapsedMilliseconds
                 )
-
-                printfn
-                    $"*** Correlation request {corrRef} completed. Response size: {ctx.Response.ContentLength}. Time (ms): {stopwatch.ElapsedMilliseconds}."
             }
             |> Async.StartAsTask
             :> Task
-            
+
     type PeepsLiveViewMiddleware(next: RequestDelegate) =
         member _.Invoke(ctx: HttpContext) =
             async {
                 if ctx.Request.Path = PathString("/log/live") then
                     match ctx.WebSockets.IsWebSocketRequest with
                     | true ->
-                        use! webSocket = ctx.WebSockets.AcceptWebSocketAsync() |> Async.AwaitTask
-                        LiveView.sockets <- LiveView.addSocket LiveView.sockets webSocket                                    
+                        use! webSocket =
+                            ctx.WebSockets.AcceptWebSocketAsync()
+                            |> Async.AwaitTask
+
+                        LiveView.sockets <- LiveView.addSocket LiveView.sockets webSocket
                         printfn $"Socket state: {webSocket.State}"
                         let buffer: byte array = Array.zeroCreate 4096
                         //do! Async.Sleep 5000
@@ -61,8 +70,10 @@ module Middleware =
                         while true do
                             // Needed?
                             do! Async.Sleep 1000
-                            
+
                     | false -> ctx.Response.StatusCode <- 400
                 else
                     return! next.Invoke(ctx) |> Async.AwaitTask
-            } |> Async.StartAsTask :> Task
+            }
+            |> Async.StartAsTask
+            :> Task
