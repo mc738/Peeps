@@ -9,6 +9,7 @@
     <ItemGroup>
         <Compile Include="Core.fs" />
         <Compile Include="HealthChecks.fs" />
+        <Compile Include="AppStreams.fs" />
         <Compile Include="Agent.fs" />
         <Compile Include="LiveView.fs" />
         <Compile Include="Middleware.fs" />

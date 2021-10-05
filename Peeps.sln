@@ -18,6 +18,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Monitoring", "Peeps.M
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freql.Sqlite", "..\Freql\Freql.Sqlite\Freql.Sqlite.fsproj", "{76ECB00B-E603-4B2A-9B68-190772E53C7E}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Monitoring.Server", "Peeps.Monitoring.Server\Peeps.Monitoring.Server.fsproj", "{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{76ECB00B-E603-4B2A-9B68-190772E53C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76ECB00B-E603-4B2A-9B68-190772E53C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76ECB00B-E603-4B2A-9B68-190772E53C7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{76ECB00B-E603-4B2A-9B68-190772E53C7E} = {0935A32C-DA6A-410D-85FF-A2D2B853BC0C}

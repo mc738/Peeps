@@ -18,6 +18,7 @@ open Peeps
 open Peeps.Core
 open Peeps.Extensions
 open Peeps.Monitoring
+open Peeps.Monitoring
 open Peeps.Monitoring.HealthChecks
 open Peeps.Logger
 open Giraffe.Middleware
@@ -65,6 +66,17 @@ module Routes =
 
             text "Warn" next ctx
             
+    
+    
+    let metrics: HttpHandler =
+        fun (next: HttpFunc) (ctx: HttpContext) ->
+            let logger = ctx.GetLogger("Test")
+
+            logger.LogInformation "Hello, from metrics"
+            let service = ctx.GetService<PeepsMonitorAgent>()
+            let metrics = service.GetMetrics()
+            json metrics next ctx
+            
     let fail: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) -> failwith "Unhandled exception."
 
@@ -75,7 +87,8 @@ let webApp =
              route "/debug" >=> Routes.debug
              route "/error" >=> Routes.error
              route "/warning" >=> Routes.warn
-             route "/fail" >=> Routes.fail ]
+             route "/fail" >=> Routes.fail
+             route "/metrics" >=> Routes.metrics ]
 
 let configureApp (app: IApplicationBuilder) =
     

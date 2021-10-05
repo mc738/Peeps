@@ -15,6 +15,14 @@ type ResponsePost =
       Size: int64
       ResponseCode: int
       Time: int64 }
+    
+type AppMetrics = {
+    Requests: int64
+    Errors: int64
+    Criticals: int64
+    BytesReceived: int64
+    BytesSent: int64
+}
 
 module Internal =
 
@@ -51,19 +59,40 @@ module Internal =
         )
         |> ignore
 
+[<RequireQualifiedAccess>]
 type AgentMessage =
     | Request of RequestPost
     | Response of ResponsePost
-    | GetRequestCount of AsyncReplyChannel<int64>
+    | Error of ResponsePost
+    | Critical of ResponsePost
+    | GetMetrics of AsyncReplyChannel<AppMetrics>
 
 
-type AgentState = {
-       Writer: QueryHandler
-       Requests: int64
-}
+type AgentState =
+    { Writer: QueryHandler
+      Requests: int64
+      Errors: int64
+      Criticals: int64
+      BytesReceived: int64
+      BytesSent: int64 }
+    static member Create(qh: QueryHandler) =
+        { Writer = qh
+          Requests = 0L
+          Errors = 0L
+          Criticals = 0L
+          BytesReceived = 0L
+          BytesSent = 0L }
+
+    member s.ToAppMetrics() = ({
+        Requests = s.Requests
+        Errors = s.Errors
+        Criticals = s.Criticals
+        BytesReceived = s.BytesReceived
+        BytesSent = s.BytesSent
+    }: AppMetrics)
 
 type PeepsMonitorAgent(path: string) =
-    
+
     let agent =
         MailboxProcessor<AgentMessage>.Start
             (fun inbox ->
@@ -74,26 +103,46 @@ type PeepsMonitorAgent(path: string) =
                         let newState =
                             match msg with
                             | AgentMessage.Request r ->
-                                printfn $"*** Correlation request {r.CorrelationReference}. Route: {r.Url}. Size: {r.RequestSize}"
+                                //printfn $"*** Correlation request {r.CorrelationReference}. Route: {r.Url}. Size: {r.RequestSize}"
                                 Internal.saveRequest state.Writer r
-                                { state with Requests = state.Requests + 1L }
+
+                                { state with
+                                      Requests = state.Requests + 1L
+                                      BytesReceived = state.BytesReceived + r.RequestSize }
                             | AgentMessage.Response r ->
-                                printfn
-                                    $"*** Correlation request {r.CorrelationReference} completed. Code: {r.ResponseCode}. Response size: {r.Size}. Time (ms): {r.Time}."
+                                //printfn
+                                //    $"*** Correlation request {r.CorrelationReference} completed. Code: {r.ResponseCode}. Response size: {r.Size}. Time (ms): {r.Time}."
                                 Internal.saveResponse state.Writer r
-                                state
-                            | AgentMessage.GetRequestCount rc ->
-                                rc.Reply state.Requests
+
+                                { state with
+                                      BytesSent = state.BytesSent + r.Size }
+                            | AgentMessage.Error r ->
+                                Internal.saveResponse state.Writer r
+
+                                { state with
+                                      Errors = state.Errors + 1L
+                                      BytesSent = state.BytesSent + r.Size }
+                            | AgentMessage.Critical r ->
+                                Internal.saveResponse state.Writer r
+
+                                { state with
+                                      Errors = state.Criticals + 1L
+                                      BytesSent = state.BytesSent + r.Size }
+                            | AgentMessage.GetMetrics rc ->
+                                state.ToAppMetrics() |> rc.Reply
                                 state
 
                         return! loop (newState)
                     }
 
                 // Create the db.
-                
-                let qh = QueryHandler.Create(Path.Combine(path, "metrics.db"))    
-                qh.ExecuteSqlNonQuery Internal.requestsTableSql |> ignore
-                loop ({ Writer = qh; Requests = 0L }))
+                let qh =
+                    QueryHandler.Create(Path.Combine(path, $"metrics_{DateTime.UtcNow:yyyyMMddHHmmss}.db"))
+
+                qh.ExecuteSqlNonQuery Internal.requestsTableSql
+                |> ignore
+
+                loop (AgentState.Create(qh)))
 
     member _.SaveRequest(correlationRef: Guid, size: int64, url: string) =
         { CorrelationReference = correlationRef
@@ -110,6 +159,22 @@ type PeepsMonitorAgent(path: string) =
           Time = time }
         |> AgentMessage.Response
         |> agent.Post
-        
-    member _.RequestCount() =
-        agent.PostAndReply<int64>(fun rc -> AgentMessage.GetRequestCount rc)
+
+    member _.SaveError(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
+        { CorrelationReference = correlationRef
+          Size = size
+          ResponseCode = responseCode
+          Time = time }
+        |> AgentMessage.Error
+        |> agent.Post
+
+    member _.SaveCritical(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
+        { CorrelationReference = correlationRef
+          Size = size
+          ResponseCode = responseCode
+          Time = time }
+        |> AgentMessage.Critical
+        |> agent.Post
+
+    member _.GetMetrics() =
+        agent.PostAndReply<AppMetrics>(fun rc -> AgentMessage.GetMetrics rc)        

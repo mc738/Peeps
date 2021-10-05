@@ -31,22 +31,37 @@ module Middleware =
 
                 try
                     do! next.Invoke(ctx) |> Async.AwaitTask
+                    stopwatch.Stop()
+
+                    let outcome =
+                        match ctx.Response.StatusCode < 400 with
+                        | true -> ma.SaveResponse
+                        | false -> ma.SaveError
+
+                    outcome (
+                        corrRef,
+                        ctx.Response.ContentLength
+                        |> Option.ofNullable
+                        |> Option.defaultValue 0L,
+                        ctx.Response.StatusCode,
+                        stopwatch.ElapsedMilliseconds
+                    )
+
                 with
                 | ex ->
+                    stopwatch.Stop()
                     let logger = ctx.GetLogger("peeps-monitor")
                     logger.LogCritical($"Unhandled exception in route '{ctx.GetRequestUrl()}'. Error: {ex.Message}")
                     ctx.Response.StatusCode <- 500
 
-                stopwatch.Stop()
-
-                ma.SaveResponse(
-                    corrRef,
-                    ctx.Response.ContentLength
-                    |> Option.ofNullable
-                    |> Option.defaultValue 0L,
-                    ctx.Response.StatusCode,
-                    stopwatch.ElapsedMilliseconds
-                )
+                    ma.SaveCritical(
+                        corrRef,
+                        ctx.Response.ContentLength
+                        |> Option.ofNullable
+                        |> Option.defaultValue 0L,
+                        ctx.Response.StatusCode,
+                        stopwatch.ElapsedMilliseconds
+                    )
             }
             |> Async.StartAsTask
             :> Task
