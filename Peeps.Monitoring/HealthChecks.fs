@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Net.Http
 open System.Text
 open System.Text.Json
 open System.Threading.Tasks
@@ -118,3 +119,5 @@ module HealthChecks =
         static member Name = "uptime"
         
         static member FailureStatus = HealthStatus.Unhealthy
+            
+       

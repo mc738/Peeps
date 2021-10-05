@@ -1,0 +1,153 @@
+﻿@page "/"
+@using Fluff.Razor
+@using Fluff.Core
+<PageControl>
+    <PageItem Text="Dashboard" Icon="fas fa-home">
+        <div id="main" class="h-100 w-100">
+            <GridControl>
+                <GridItem Column="1" Row="1" ColumnSpan="2" ExtraClasses="no-b-padding no-t-padding">
+                    <div class="w-100 h-fixed-1 flex-v-center">
+                        <h2>General</h2>
+                    </div>
+                    <div class="h-100-minus-fixed-1 w-100 border-rad" style="background-color: white; padding: 1rem;">
+                    </div>
+                </GridItem>
+                <GridItem Column="3" Row="1" RowSpan="2" ExtraClasses="overview-items">
+                    <TabControl>
+                        <TabItem Text="Organisations" Icon="fas fa-building">
+                            <p>Item 1</p>
+                        </TabItem>
+                        <TabItem Text="Services" Icon="fas fa-people-arrows">
+                            <p>Item 2</p>
+                        </TabItem>
+                        <TabItem Text="Taxonomy" Icon="fas fa-book">
+                            <p>Item 3</p>
+                        </TabItem>
+                    </TabControl>
+                </GridItem>
+                <GridItem Column="1" Row="2" ExtraClasses="no-t-padding">
+                    <div class="w-100 h-fixed-1 flex-v-center">
+                        <h2>Requests</h2>
+                    </div>
+                    <div class="h-100-minus-fixed-1 w-100 border-rad" style="background-color: white;">
+
+                    </div>
+                </GridItem>
+                <GridItem Column="2" Row="2" ExtraClasses="no-t-padding">
+                    <div class="w-100 h-fixed-1 flex-v-center">
+                        <h2>Updates</h2>
+                    </div>
+                    <div class="h-100-minus-fixed-1 w-100 border-rad" style="background-color: white;">
+
+                    </div>
+                </GridItem>
+            </GridControl>
+        </div>
+    </PageItem>
+    <PageItem Text="Organisations" Icon="fas fa-building">
+        <div id="form" class="h-100 w-100 page" style="background-color: white; border-radius: 20px;">
+            <div class="h-fixed-1 w-100">
+                <div>
+                    <p>Organisations</p>
+                </div>
+                <div>
+                    <p>Services</p>
+                </div>
+            </div>
+            <div class="" style="height: calc(100% - 50px);">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width: 30%;">Name</th>
+                        <th style="width: 30%;">Address</th>
+                        <th style="width: 10%;">Email</th>
+                        <th style="width: 10%;">Phone</th>
+                        <th style="width: 10%;">Website</th>
+                        <th style="width: 10%;">View</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="selectable-row">
+                        <td>
+                            <p>
+                                Test organization 1 ddddd ddddddddd dddd ddddd ddddddd ddddddddd
+                            </p>
+                        </td>
+                        <td>
+                            <p>
+                                123 Test street, Test City. AA1 1AA
+                            </p>
+                        </td>
+                        <td>
+                            test@example.com
+                        </td>
+                        <td>
+                            01234-556677
+                        </td>
+                        <td>
+                            www.example.com
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="selectable-row">
+                        <td>
+                            <p>
+                                Test organization 2
+                            </p>
+                        </td>
+                        <td>
+                            <p>
+                                123 Test street, Test City. AA1 1AA
+                            </p>
+                        </td>
+                        <td>
+                            test@example.com
+                        </td>
+                        <td>
+                            01234-556677
+                        </td>
+                        <td>
+                            www.example.com
+                        </td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </PageItem>
+    <PageItem Text="Inputs examples" Icon="fas fa-keyboard">
+        <div>
+            <div>
+                <Button Icon="fas fa-save" Type="ButtonType.Primary" Label="Primary" Clicked=@(c => Console.WriteLine("Button clicked"))></Button>
+            </div>
+            <div>
+                <Button Icon="fas fa-save" Type="ButtonType.Secondary" Label="Secondary" Clicked=@(c => Console.WriteLine("Button clicked"))></Button>
+            </div>
+            <div>
+                <Button Icon="fas fa-save" Type="ButtonType.Success" Label="Success" Clicked=@(c => Console.WriteLine("Button clicked"))></Button>
+            </div>
+            <div>
+                <Button Icon="fas fa-save" Type="ButtonType.Danger" Label="Danger" Clicked=@(c => Console.WriteLine("Button clicked"))></Button>
+            </div>
+            <div>
+                <Button Icon="fas fa-save" Type="ButtonType.Warning" Label="Warning" Clicked=@(c => Console.WriteLine("Button clicked"))></Button>
+            </div>
+            <div>
+                <Button Icon="fas fa-save" Type="ButtonType.Information" Label="Information" Clicked=@(c => Console.WriteLine("Button clicked"))></Button>
+            </div>
+        </div>
+    </PageItem>
+    <PageItem Text="Test" Icon="fas fa-plus">
+        @ChartRenderer.RenderTest()
+    </PageItem>
+    <PageItem Text="Live view" Icon="fas fa-terminal">
+        <LiveView></LiveView>
+    </PageItem>
+</PageControl>
+
+@code {
+    //private ChartRenderer _renderer = new ChartRenderer();
+
+
+}

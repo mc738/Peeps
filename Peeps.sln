@@ -20,6 +20,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Freql.Sqlite", "..\Freql\Fr
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Monitoring.Server", "Peeps.Monitoring.Server\Peeps.Monitoring.Server.fsproj", "{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peeps.Monitoring.WebApp", "Peeps.Monitoring.WebApp\Peeps.Monitoring.WebApp.csproj", "{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fluff.Razor", "..\Fluff\Fluff.Razor\Fluff.Razor.fsproj", "{D8764069-D33A-4ED7-AA42-925592DE7D01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,8 +54,17 @@ Global
 		{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{76ECB00B-E603-4B2A-9B68-190772E53C7E} = {0935A32C-DA6A-410D-85FF-A2D2B853BC0C}
+		{D8764069-D33A-4ED7-AA42-925592DE7D01} = {0935A32C-DA6A-410D-85FF-A2D2B853BC0C}
 	EndGlobalSection
 EndGlobal
