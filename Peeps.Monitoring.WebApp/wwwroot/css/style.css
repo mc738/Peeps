@@ -857,3 +857,19 @@ th {
     padding-left: 5px;
     font-size: 12pt;
 }
+
+svg text {
+    display: none;
+}
+
+svg g:hover text {
+    display: block;
+}
+
+svg g:hover path {
+    stroke-width: 0.2;
+}
+
+.node {
+    z-index: 10;
+}

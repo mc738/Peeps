@@ -1,35 +1,38 @@
 ﻿<div class="h-100 w-100" style="display: flex;">
     <div style="height: 100%; width: calc(100% - 200px)">
         <svg id="svg" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" style="max-height: 90vh">
-        @foreach (var node in _nodes)
-        {
-            <circle r="1" cx="@node.X" cy="@node.Y" fill="purple" stroke="none"></circle>
-            @foreach (var conn in node.Connections)
+            @foreach (var node in _nodes)
             {
-                // Check the display settings.
-
-                var to = _nodes.SingleOrDefault(x => x.Name == conn);
-                if (to != null)
-                {
-                    var ds = _displaySettings.SingleOrDefault(x => x.NodeName == node.Name);
-                    var toDs = _displaySettings.SingleOrDefault(x => x.NodeName == to.Name);
-
-                    if (ds != null && toDs != null && (ds.ShowFrom || toDs.ShowTo))
+                <g>
+                    <circle r="1" cx="@node.X" cy="@node.Y" fill="purple" stroke="none" class="node"></circle>
+                    <text x="@node.X" y="@(node.Y - 2)" style="text-anchor: middle; font-size: 3px">@node.Name</text>
+                    @foreach (var conn in node.Connections)
                     {
-                        var path = $"M {node.X} {node.Y} L {to.X} {to.Y}";
-                        <path d="@path" stroke="grey" stroke-width="0.1"></path>
+                        // Check the display settings.
 
-                        if (ds.ShowAnimation)
+                        var to = _nodes.SingleOrDefault(x => x.Name == conn);
+                        if (to != null)
                         {
-                            <circle r="0.5" fill="red">
-                                <animateMotion path="@path" dur="5s" repeatCount="indefinite"></animateMotion>
-                            </circle>
+                            var ds = _displaySettings.SingleOrDefault(x => x.NodeName == node.Name);
+                            var toDs = _displaySettings.SingleOrDefault(x => x.NodeName == to.Name);
+
+                            if (ds != null && toDs != null && (ds.ShowFrom || toDs.ShowTo))
+                            {
+                                var path = $"M {node.X} {node.Y} L {to.X} {to.Y}";
+                                <path d="@path" stroke="grey" stroke-width="0.1"></path>
+
+                                if (ds.ShowAnimation)
+                                {
+                                    <circle r="0.5" fill="red">
+                                        <animateMotion path="@path" dur="5s" repeatCount="indefinite"></animateMotion>
+                                    </circle>
+                                }
+                            }
                         }
                     }
-                }
+                </g>
             }
-        }
-    </svg>
+        </svg>
     </div>
     <div style="height: 100%; width: 200px">
         <Button Label="Refresh" Clicked="StateHasChanged"></Button>
@@ -52,9 +55,9 @@
         public int Y { get; set; }
 
         public string Name { get; set; }
-        
+
         public IEnumerable<string> Connections { get; set; }
-        
+
         public Node(int x, int y, string name, IEnumerable<string> connections)
         {
             X = x;
@@ -79,7 +82,7 @@
             ShowAnimation = true;
         }
     }
-    
+
     IEnumerable<Node> _nodes = new List<Node>()
     {
         new(10, 20, "node_1", new List<string>() { "node_2", "node_3" }),
@@ -98,5 +101,5 @@
         new("node_5")
     };
 
-    
+
 }
