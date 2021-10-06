@@ -1,0 +1,102 @@
+﻿<div class="h-100 w-100" style="display: flex;">
+    <div style="height: 100%; width: calc(100% - 200px)">
+        <svg id="svg" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" style="max-height: 90vh">
+        @foreach (var node in _nodes)
+        {
+            <circle r="1" cx="@node.X" cy="@node.Y" fill="purple" stroke="none"></circle>
+            @foreach (var conn in node.Connections)
+            {
+                // Check the display settings.
+
+                var to = _nodes.SingleOrDefault(x => x.Name == conn);
+                if (to != null)
+                {
+                    var ds = _displaySettings.SingleOrDefault(x => x.NodeName == node.Name);
+                    var toDs = _displaySettings.SingleOrDefault(x => x.NodeName == to.Name);
+
+                    if (ds != null && toDs != null && (ds.ShowFrom || toDs.ShowTo))
+                    {
+                        var path = $"M {node.X} {node.Y} L {to.X} {to.Y}";
+                        <path d="@path" stroke="grey" stroke-width="0.1"></path>
+
+                        if (ds.ShowAnimation)
+                        {
+                            <circle r="0.5" fill="red">
+                                <animateMotion path="@path" dur="5s" repeatCount="indefinite"></animateMotion>
+                            </circle>
+                        }
+                    }
+                }
+            }
+        }
+    </svg>
+    </div>
+    <div style="height: 100%; width: 200px">
+        <Button Label="Refresh" Clicked="StateHasChanged"></Button>
+        @foreach (var ds in _displaySettings)
+        {
+            <h2>@ds.NodeName</h2>
+            <SwitchInput Label="Show from" @bind-Value="@ds.ShowFrom"></SwitchInput>
+            <SwitchInput Label="Show to" @bind-Value="@ds.ShowTo"></SwitchInput>
+            <SwitchInput Label="Show animation" @bind-Value="@ds.ShowAnimation"></SwitchInput>
+        }
+    </div>
+</div>
+
+@code {
+
+    class Node
+    {
+        public int X { get; set; }
+
+        public int Y { get; set; }
+
+        public string Name { get; set; }
+        
+        public IEnumerable<string> Connections { get; set; }
+        
+        public Node(int x, int y, string name, IEnumerable<string> connections)
+        {
+            X = x;
+            Y = y;
+            Name = name;
+            Connections = connections;
+        }
+    }
+
+    class DisplaySettings
+    {
+        public string NodeName { get; set; }
+        public bool ShowFrom { get; set; }
+        public bool ShowTo { get; set; }
+        public bool ShowAnimation { get; set; }
+
+        public DisplaySettings(string nodeName)
+        {
+            NodeName = nodeName;
+            ShowFrom = true;
+            ShowTo = true;
+            ShowAnimation = true;
+        }
+    }
+    
+    IEnumerable<Node> _nodes = new List<Node>()
+    {
+        new(10, 20, "node_1", new List<string>() { "node_2", "node_3" }),
+        new(80, 20, "node_2", new List<string>() { "node_4" }),
+        new(80, 80, "node_3", new List<string>() { "node_5" }),
+        new(45, 70, "node_4", new List<string>() { "node_5" }),
+        new(20, 90, "node_5", new List<string>() { "node_1" }),
+    };
+
+    IEnumerable<DisplaySettings> _displaySettings = new List<DisplaySettings>()
+    {
+        new("node_1"),
+        new("node_2"),
+        new("node_3"),
+        new("node_4"),
+        new("node_5")
+    };
+
+    
+}
