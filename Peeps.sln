@@ -24,6 +24,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peeps.Monitoring.WebApp", "
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fluff.Razor", "..\Fluff\Fluff.Razor\Fluff.Razor.fsproj", "{D8764069-D33A-4ED7-AA42-925592DE7D01}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Tools", "Peeps.Tools\Peeps.Tools.fsproj", "{A543129C-674F-49C0-B7D9-6D8FF200DFCB}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Tools.App", "Peeps.Tools.App\Peeps.Tools.App.fsproj", "{0530403A-6D98-4D90-A5DD-56D54340EF18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +66,14 @@ Global
 		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A543129C-674F-49C0-B7D9-6D8FF200DFCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A543129C-674F-49C0-B7D9-6D8FF200DFCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A543129C-674F-49C0-B7D9-6D8FF200DFCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A543129C-674F-49C0-B7D9-6D8FF200DFCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0530403A-6D98-4D90-A5DD-56D54340EF18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0530403A-6D98-4D90-A5DD-56D54340EF18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0530403A-6D98-4D90-A5DD-56D54340EF18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0530403A-6D98-4D90-A5DD-56D54340EF18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{76ECB00B-E603-4B2A-9B68-190772E53C7E} = {0935A32C-DA6A-410D-85FF-A2D2B853BC0C}

@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <WarnOn>3390;$(WarnOn)</WarnOn>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include=".dockerignore" />
+      <Content Include="Dockerfile" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Freql\Freql.Sqlite\Freql.Sqlite.fsproj" />
+      <ProjectReference Include="..\Peeps.Monitoring\Peeps.Monitoring.fsproj" />
+      <ProjectReference Include="..\Peeps.Tools\Peeps.Tools.fsproj" />
+      <ProjectReference Include="..\Peeps\Peeps.fsproj" />
+    </ItemGroup>
+
+</Project>
