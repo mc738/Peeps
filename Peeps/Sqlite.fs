@@ -2,11 +2,14 @@ module Peeps.Sqlite
 
 open System
 open System
+open System
 open System.IO
 open System.IO
 open Microsoft.Data.Sqlite
 open Peeps.Core
 
+
+[<Obsolete("SqliteContext is obsolete. Use LogStore instead.")>]
 type SqliteContext =
     { CreatedOn: DateTime
       Path: string
@@ -41,6 +44,7 @@ type SqliteContext =
         conn.Open()
         conn
 
+[<Obsolete("Query<'p, 'r> is obsolete. Use LogStore instead.")>]
 type Query<'p, 'r> =
     { Sql: string
       ParameterMapper: Option<'p -> Map<string, obj>>
@@ -111,6 +115,7 @@ module private Internal =
         [ createLogsTableQuery ]
         |> List.map (fun q -> q.Execute(conn, ()))
 
+[<Obsolete("DBWriter is obsolete. Use LogStore instead.")>]
 type DbWriter(path, name) =
 
     let mutable context = SqliteContext.Create(path, name)

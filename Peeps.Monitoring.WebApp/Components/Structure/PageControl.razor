@@ -1,0 +1,20 @@
+﻿@inherits PageControlBase
+
+<main>
+    <div class="side-bar">
+        <div class="items">
+            @foreach (var p in Pages)
+            {
+                <span class="item side-bar-item" @onclick=@(() => ActivatePage(p))>
+                    <div class="item-label">
+                        <p>@p.Text</p>
+                    </div>
+                    <i class="@p.Icon"></i>
+                </span>
+            }
+        </div>
+    </div>
+    <CascadingValue Value="this">
+        @ChildContent
+    </CascadingValue>
+</main>

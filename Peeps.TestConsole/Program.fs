@@ -20,6 +20,6 @@ let main argv =
     let host = createHostBuilder argv
 
     host.Build().Run()
-
+      
     printfn "Hello World from F#!"
     0 // return an integer exit code

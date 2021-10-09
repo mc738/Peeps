@@ -1,0 +1,38 @@
+﻿@inherits TabControlBase
+
+<div class="tabs">
+
+    <ol class="tab-list">
+        @foreach (TabItem tabPage in Pages)
+        {
+            <li class="tab-list-item @(ActivePage == tabPage ? "tab-list-active" : "")"
+                @onclick=@( () => ActivatePage(tabPage) )>
+                <div style="display: flex;">
+                    <p>
+                        @if (tabPage.Icon != null)
+                        {
+                            <span style="padding-right: 0.5em"><i class="@tabPage.Icon"></i></span>
+                        }
+                        @if (tabPage.Text != null)
+                        {
+                            @tabPage.Text
+                        }
+                        @if (tabPage.Closable)
+                        {
+                            <span style="padding-left: 0.5em" @onclick=@(() => CloseTab(tabPage))>
+                                <i class="fas fa-times"></i>
+
+                            </span>
+                        }
+                    </p>
+                </div>
+            </li>
+        }
+    </ol>
+
+    <div class="@GenerateContainerStyle()">
+        <CascadingValue Value="this">
+            @ChildContent
+        </CascadingValue>
+    </div>
+</div>

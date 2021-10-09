@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <WarnOn>3390;$(WarnOn)</WarnOn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Core.fs" />
+        <Compile Include="HealthChecks.fs" />
+        <Compile Include="AppStreams.fs" />
+        <Compile Include="Agent.fs" />
+        <Compile Include="LiveView.fs" />
+        <Compile Include="Middleware.fs" />
+        <Compile Include="Extensions.fs" />
+        <Compile Include="Tools.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Giraffe" Version="5.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Freql\Freql.Sqlite\Freql.Sqlite.fsproj" />
+      <ProjectReference Include="..\Peeps\Peeps.fsproj" />
+    </ItemGroup>
+
+</Project>

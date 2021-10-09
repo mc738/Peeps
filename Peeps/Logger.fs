@@ -1,55 +1,74 @@
-namespace Peeps
+namespace Peeps.Logger
 
 open System
+open System.Collections.Concurrent
+open Microsoft.Extensions.Logging
+open Peeps.Core
 
-[<Obsolete("Old api")>]
-type LogItem =
-    { from: string
-      message: string
-      time: DateTime
-      ``type``: ItemType }
+type LoggerAction = PeepsLogItem -> unit
 
-and [<Obsolete("Old api")>] ItemType =
-    | Success
-    | Error
-    | Information
-    | Warning
-    | Debug
+type LoggerConfig =
+    { EventId: int
+      LogLevel: LogLevel
+      Actions: LoggerAction list }
+    static member Create(logLevel, actions, eventId) =
+        { EventId = eventId
+          LogLevel = logLevel
+          Actions = actions }
 
-/// A basic logging class.
-[<Obsolete("Old api")>]
-type Logger() =
+    static member InfoConfig(actions, eventId) =
+        LoggerConfig.Create(LogLevel.Information, actions, eventId)
 
-    let getCCT itemType =
-        match itemType with
-        | Success -> (ConsoleColor.Green, "OK")
-        | Error -> (ConsoleColor.Red, "ERROR")
-        | Information -> (ConsoleColor.White, "INFO")
-        | Warning -> (ConsoleColor.Yellow, "WARN")
-        | Debug -> (ConsoleColor.Magenta, "DEBUG")
+    static member DebugConfig(actions, eventId) =
+        LoggerConfig.Create(LogLevel.Debug, actions, eventId)
 
-    let handleItem item =
-        let (color, title) = getCCT item.``type``
-        Console.ForegroundColor <- color
-        printf "%s\t" title
-        Console.ResetColor()
-        let time = item.time.ToString()
-        printfn "[%s] %s: %s" time item.from item.message
-        true
+    static member TraceConfig(actions, eventId) =
+        LoggerConfig.Create(LogLevel.Trace, actions, eventId)
 
-    let listener =
-        MailboxProcessor<LogItem>
-            .Start(fun inbox ->
-                let rec loop () =
-                    async {
+    static member ErrorConfig(actions, eventId) =
+        LoggerConfig.Create(LogLevel.Error, actions, eventId)
 
-                        let! item = inbox.Receive()
+    static member WarningConfig(actions, eventId) =
+        LoggerConfig.Create(LogLevel.Warning, actions, eventId)
 
-                        let cont = handleItem item
+    static member CriticalConfig(actions, eventId) =
+        LoggerConfig.Create(LogLevel.Critical, actions, eventId)
 
-                        if cont then return! loop ()
-                    }
+type Logger(name: string, config: LoggerConfig) =
 
-                loop ())
+    interface ILogger with
+        member this.BeginScope(state) = Unchecked.defaultof<IDisposable>
+        member this.IsEnabled(logLevel) = logLevel = config.LogLevel
 
-    member this.Post item = listener.Post item
+        member this.Log(logLevel, eventId, state, ``exception``, formatter) =
+            match (this :> ILogger).IsEnabled(logLevel)
+                  && (config.EventId = 0 || config.EventId = eventId.Id) with
+            | true ->
+                // create the peeps log item
+                let message =
+                    $"[%i{eventId.Id} %s{logLevel.ToString()}] %s{name} - %s{formatter.Invoke(state, ``exception``)}"
+
+                let item =
+                    PeepsLogItem.Create(logLevel, name, message)
+                
+                config.Actions |> List.map (fun a -> a item) |> ignore
+            | false -> () // Do nothing.
+
+type LoggerProvider(config: LoggerConfig) =
+
+    let mutable _loggers = ConcurrentDictionary<string, Logger>()
+
+    interface ILoggerProvider with
+        member this.CreateLogger(categoryName) =
+            _loggers.GetOrAdd(categoryName, (fun name -> new Logger(name, config))) :> ILogger
+
+        member this.Dispose() = _loggers.Clear()
+
+type PeepsContext =
+    { Name: string
+      OutputDirectory: string
+      Actions: LoggerAction list }
+    static member Create(outputDirectory, name, actions) =
+        { Name = name
+          OutputDirectory = outputDirectory
+          Actions = actions }

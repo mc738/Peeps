@@ -1,0 +1,170 @@
+﻿@using Peeps.Tools
+@using Microsoft.FSharp.Collections
+@using Peeps.Monitoring.WebApp.Services
+@inject ModalService _modal
+
+<div class="h-100 w-100" style="display: flex;">
+    <div style="height: 100%; width: calc(100% - 200px)">
+        <svg id="svg" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" style="max-height: 90vh">
+            @foreach (var component in _map.Components)
+            {
+                <g>
+                    <circle r="1" cx="@component.X" cy="@component.Y" fill="purple" stroke="none" class="node" @onclick="() => ShowComponentDetails(component)"></circle>
+                    <text x="@component.X" y="@(component.Y - 2)" style="text-anchor: middle; font-size: 3px">@component.Name</text>
+                    @foreach (var conn in component.Connections)
+                    {
+                        // Check the display settings.
+
+                        var to = _map.Components.SingleOrDefault(x => x.Id == conn.To);
+                        if (to != null)
+                        {
+                            var ds = _displaySettings.SingleOrDefault(x => x.NodeId == component.Id);
+                            var toDs = _displaySettings.SingleOrDefault(x => x.NodeId == to.Id);
+
+                            if (ds != null && toDs != null && (ds.ShowFrom || toDs.ShowTo))
+                            {
+                                var path = $"M {component.X} {component.Y} L {to.X} {to.Y}";
+                                <path d="@path" stroke="grey" stroke-width="0.1"></path>
+
+                                if (ds.ShowAnimation)
+                                {
+                                    <circle r="0.5" fill="red">
+                                        <animateMotion path="@path" dur="5s" repeatCount="indefinite"></animateMotion>
+                                    </circle>
+                                }
+                            }
+                        }
+                    }
+                </g>
+            }
+        </svg>
+    </div>
+    <div style="height: 100%; width: 200px">
+        <Button Label="Refresh" Clicked="StateHasChanged"></Button>
+        @foreach (var ds in _displaySettings)
+        {
+            <h2>@ds.NodeId</h2>
+            <SwitchInput Label="Show from" @bind-Value="@ds.ShowFrom"></SwitchInput>
+            <SwitchInput Label="Show to" @bind-Value="@ds.ShowTo"></SwitchInput>
+            <SwitchInput Label="Show animation" @bind-Value="@ds.ShowAnimation"></SwitchInput>
+        }
+    </div>
+</div>
+
+@code {
+    
+    class DisplaySettings
+    {
+        public string NodeId { get; set; }
+        public bool ShowFrom { get; set; }
+        public bool ShowTo { get; set; }
+        public bool ShowAnimation { get; set; }
+
+        public DisplaySettings(string nodeId)
+        {
+            NodeId = nodeId;
+            ShowFrom = true;
+            ShowTo = true;
+            ShowAnimation = true;
+        }
+    }
+
+    InfrastructureMapping.InfrastructureMap _map = new InfrastructureMapping.InfrastructureMap(new List<InfrastructureMapping.MapComponent>()
+    {
+        new(
+            "fiket_auth",
+            "fiket.io auth service",
+            "The fiket.io auth service",
+            10,
+            10,
+            new List<InfrastructureMapping.MetadataItem>()
+            {
+                new ("url", "https://auth.fiket.io")
+            },
+            new List<string>() { "software", "fiket.io", "service", "public" },
+            new List<InfrastructureMapping.DocumentItem>(),
+            new List<InfrastructureMapping.Connection>()
+            {
+                new(
+                    "", 
+                    "", 
+                    "", 
+                    "", 
+                    new List<InfrastructureMapping.MetadataItem>(),
+                    new List<string>() { "software", "fiket.io" },
+                    new List<InfrastructureMapping.DocumentItem>())
+            }),
+        new(
+            "fiket_blobstore",
+            "fiket.io blob store service",
+            "The fiket.io blob store service",
+            80,
+            10,
+            new List<InfrastructureMapping.MetadataItem>()
+            {
+                new ("url", "https://blobs.fiket.io")
+            },
+            new List<string>() { "software", "fiket.io", "service", "public" },
+            new List<InfrastructureMapping.DocumentItem>(),
+            new List<InfrastructureMapping.Connection>()
+            {
+                new(
+                    "fiket_blobstore-auth", 
+                    "", 
+                    "The blob store uses the auth service to authenticate users, sessions and subscriptions.", 
+                    "fiket_auth", 
+                    new List<InfrastructureMapping.MetadataItem>(),
+                    new List<string>() { "internal-or-external", "fiket.io" },
+                    new List<InfrastructureMapping.DocumentItem>())
+            }),
+        new(
+            "fiket_comms",
+            "fiket.io comms store service",
+            "The fiket.io comms store service",
+            70,
+            70,
+            new List<InfrastructureMapping.MetadataItem>()
+            {
+                new ("isPublic", "false"),
+                new ("url", "localhost:5001") // TODO check url
+            },
+            new List<string>() { "software", "fiket.io" },
+            new List<InfrastructureMapping.DocumentItem>(),
+            new List<InfrastructureMapping.Connection>()
+            {
+                new(
+                    "fiket-comms-auth", 
+                    "", 
+                    "The blob store uses the auth service to authenticate users, sessions and subscriptions. The comms service is currently internal only (i.e. only reachable on the local machine).", 
+                    "fiket_auth", 
+                    new List<InfrastructureMapping.MetadataItem>(),
+                    new List<string>() { "internal-or-external", "fiket.io", "service", "internal" },
+                    new List<InfrastructureMapping.DocumentItem>()),
+                new(
+                    "fiket_comms-blobstore", 
+                    "", 
+                    "The comms service uses the blob store to hold attachment and store results and other artifacts.", 
+                    "fiket_blobstore", 
+                    new List<InfrastructureMapping.MetadataItem>()
+                    {
+                        new ("url", "https://www.fiket.io/blobstore")
+                    },
+                    new List<string>() { "internal-or-external", "fiket.io" },
+                    new List<InfrastructureMapping.DocumentItem>())
+            })
+    });
+
+    IEnumerable<DisplaySettings> _displaySettings = new List<DisplaySettings>();
+
+    protected override void OnInitialized()
+    {
+        CreateDisplaySettings();
+    }
+
+    private void CreateDisplaySettings() =>
+        _displaySettings = _map.Components.Select(x => new DisplaySettings(x.Id));
+
+    private void ShowComponentDetails(Tools.InfrastructureMapping.MapComponent component) =>
+        _modal.Show(component.Name, ComponentDetails.Create(component));
+
+}

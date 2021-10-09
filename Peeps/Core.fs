@@ -97,6 +97,15 @@ type LogItemType =
         | Error -> PeepsConsoleColor.Red
         | Warning -> PeepsConsoleColor.Yellow
         | Critical -> PeepsConsoleColor.BrightRed
+        
+    member itemType.Serialize() =
+        match itemType with
+        | LogItemType.Critical -> "critical"
+        | LogItemType.Debug -> "debug"
+        | LogItemType.Error -> "error"
+        | LogItemType.Information -> "information"
+        | LogItemType.Trace -> "trace"
+        | LogItemType.Warning -> "warning"
 
 and PeepsLogItem =
     { TimeUtc: DateTime
@@ -112,3 +121,5 @@ and PeepsLogItem =
 
     member item.Rendered =
         item.ItemType.ConsoleColor.ForegroundText item.Message
+        
+    member pli.Timestamp = DateTimeOffset(pli.TimeUtc).ToUnixTimeMilliseconds()

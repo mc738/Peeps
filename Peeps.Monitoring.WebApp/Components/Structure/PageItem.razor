@@ -1,0 +1,27 @@
+﻿@inherits PageItemBase
+
+@if (IsActive())
+{
+    <div class="main-content">
+        <div class="w-100 h-fixed-1">
+            <div style="display: flex; justify-content: space-between;">
+                <div style="margin: auto 0; padding-left: 1rem;">
+                    <h1>@Text</h1>
+                </div>
+                <div style="display: flex;">
+                    <div class="search-box">
+                        <input placeholder="Search">
+                        <div class="border"></div>
+                        <span>
+                            <i class="fas fa-search"></i>
+                        </span>
+                    </div>
+                    <img src="https://i.pravatar.cc/40" alt="User avatar" style="height: 40px; width: 40px; border-radius: 50%;">
+                </div>
+            </div>
+        </div>
+        <div class="page-container">
+            @ChildContent
+        </div>
+    </div>
+}

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <PackageVersion>0.2.0</PackageVersion>
+        <PackageVersion>0.2.2</PackageVersion>
         <Authors>Max Clifford</Authors>
         <Description>A simple F# loggger.</Description>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -15,12 +15,17 @@
         <Compile Include="Logger.fs" />
         <Compile Include="Sqlite.fs" />
         <Compile Include="PeepsLogger.fs" />
+        <Compile Include="Store.fs" />
         <Compile Include="Extensions.fs" />
+        <Compile Include="Actions.fs" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.3" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Freql\Freql.Sqlite\Freql.Sqlite.fsproj" />
     </ItemGroup>
 
 </Project>
