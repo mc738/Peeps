@@ -1,11 +1,13 @@
 ﻿namespace Peeps
 
 open System
+open System
 open System.Net.Http
 open System.Net.Http.Json
 open System.Text.Json.Serialization
 open Peeps.Core
 open Peeps.Sqlite
+open Peeps.Store
 
 [<RequireQualifiedAccess>]
 module Actions =
@@ -23,9 +25,11 @@ module Actions =
         Console.ForegroundColor <- color
         printfn $"{item.Message}"
         Console.ResetColor()
-    
+
+    [<Obsolete("writeToDb is no obsolete, use writeToStore instead.")>]    
     let writeToDb (writer: DbWriter) (item: PeepsLogItem) = writer.Write item
     
+    let writeToStore (store: LogStore) (item: PeepsLogItem) = store.AddItem item
         
     [<CLIMutable>]
     type Message ={

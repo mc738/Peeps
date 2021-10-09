@@ -1,0 +1,51 @@
+﻿<TabControl>
+    <TabItem Text="Overview">
+        <h3>Id</h3>
+        <p>@Component.Id</p>
+        <h3>Name</h3>
+        <p>@Component.Name</p>
+        <h3>Description</h3>
+        <p>@Component.Description</p>
+    </TabItem>
+    <TabItem Text="Connections">
+        @foreach (var connection in Component.Connections)
+        {
+            <h3>@connection.Name</h3>
+            <p>@connection.Description</p>
+        }
+    </TabItem>
+    <TabItem Text="Documents"></TabItem>
+    <TabItem Text="Metadata">
+        @foreach (var data in Component.Metadata)
+        {
+            <h3>@data.Key</h3>
+            <p>@data.Value</p>
+        }
+    </TabItem>
+    <TabItem Text="Tags">
+        @foreach (var tag in Component.Tags)
+        {
+            <p>@tag</p>
+        }
+    </TabItem>
+</TabControl>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    
+    [Parameter]
+    public Tools.InfrastructureMapping.MapComponent Component { get; set; }
+    
+    public static RenderFragment Create(Tools.InfrastructureMapping.MapComponent component)
+    {
+        RenderFragment Content() => builder =>
+        {
+            builder.OpenComponent(0, typeof(ComponentDetails));
+            builder.AddAttribute(1, "Component", component);
+            builder.CloseComponent();
+        };
+
+        return Content();
+    }
+}

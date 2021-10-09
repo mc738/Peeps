@@ -1,5 +1,13 @@
-﻿<h3>Modal</h3>
+﻿@inherits ModalBase
 
-@code {
-    
-}
+<div class="modal-container @(IsVisible ? "modal-active" : string.Empty)">
+    <div class="modal">
+        <div class="w-100 h-fixed-1 modal-header">
+            <h1>@Title</h1>
+            <IconButton Icon="fas fa-times" Type="ButtonType.Primary" Clicked="CloseModal"></IconButton>
+        </div>
+        <div class="w-100 h-100-minus-fixed-1">
+            @Content
+        </div>
+    </div>
+</div>

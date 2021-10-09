@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Fluff\Fluff.Razor\Fluff.Razor.fsproj" />
+      <ProjectReference Include="..\Peeps.Tools\Peeps.Tools.fsproj" />
     </ItemGroup>
 
 </Project>

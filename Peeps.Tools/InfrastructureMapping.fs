@@ -1,10 +1,64 @@
 ﻿namespace Peeps.Tools
 
+open System.Text.Json.Serialization
 open Freql.Core.Common.Types
 open Freql.Sqlite
 
 module InfrastructureMapping =
 
+    type MetadataItem =
+        { [<JsonPropertyName("key")>]
+          Key: string
+          [<JsonPropertyName("value")>]
+          Value: string }
+
+    type DocumentItem =
+        { [<JsonPropertyName("id")>]
+          Id: string
+          [<JsonPropertyName("name")>]
+          Name: string
+          [<JsonPropertyName("description")>]
+          Description: string }
+
+    type Connection =
+        { [<JsonPropertyName("id")>]
+          Id: string
+          [<JsonPropertyName("name")>]
+          Name: string
+          [<JsonPropertyName("description")>]
+          Description: string
+          [<JsonPropertyName("to")>]
+          To: string
+          [<JsonPropertyName("metadata")>]
+          Metadata: MetadataItem seq
+          [<JsonPropertyName("tags")>]
+          Tags: string seq
+          [<JsonPropertyName("documents")>]
+          Documents: DocumentItem seq }
+
+    type MapComponent =
+        { [<JsonPropertyName("id")>]
+          Id: string
+          [<JsonPropertyName("name")>]
+          Name: string
+          [<JsonPropertyName("description")>]
+          Description: string
+          [<JsonPropertyName("x")>]
+          X: int
+          [<JsonPropertyName("y")>]
+          Y: int
+          [<JsonPropertyName("metadata")>]
+          Metadata: MetadataItem seq
+          [<JsonPropertyName("tags")>]
+          Tags: string seq
+          [<JsonPropertyName("documents")>]
+          Documents: DocumentItem seq
+          [<JsonPropertyName("connections")>]
+          Connections: Connection seq }
+
+    type InfrastructureMap =
+        { [<JsonPropertyName("components")>]
+          Components: MapComponent seq }
 
     module Store =
 
@@ -202,11 +256,50 @@ module InfrastructureMapping =
 
         let addConnectionTag (qh: QueryHandler) (connectionTag: Records.ConnectionTag) =
             qh.Insert("connection_tags", connectionTag)
-            
+
         let getComponent (qh: QueryHandler) (id: string) =
-            let sql = """
+            let sql =
+                """
 			SELECT id, name, description, x, y
 			FROM components
 			WHERE id = @0;
 			"""
+
             qh.SelectSingleAnon<Records.Component>(sql, [ id ])
+
+        let getAllComponents (qh: QueryHandler) =
+            qh.Select<Records.Component>("components")
+
+        let getDocument (qh: QueryHandler) (id: string) =
+            let sql =
+                """
+			SELECT id, name, description, document
+			FROM documents
+			WHERE id = @0;
+			"""
+
+            qh.SelectSingleAnon<Records.Document>(sql, [ id ])
+
+        let getAllTags (qh: QueryHandler) = qh.Select<Records.Tag>("tags")
+
+        let getAllComponentMetadata (qh: QueryHandler) =
+            qh.Select<Records.ComponentMetadata>("components_metadata")
+
+        let getAllComponentTags (qh: QueryHandler) =
+            qh.Select<Records.ComponentTags>("component_tags")
+
+        let getAllComponentDocuments (qh: QueryHandler) =
+            qh.Select<Records.ComponentDocument>("component_documents")
+
+        let getAllConnections (qh: QueryHandler) =
+            qh.Select<Records.Connection>("connections")
+
+        let getAllConnectionDocuments (qh: QueryHandler) =
+            qh.Select<Records.ConnectionDocument>("connection_documents")
+
+        let getAllConnectionMetadata (qh: QueryHandler) =
+            qh.Select<Records.ConnectionMetadata>("connection_metadata")
+
+        let getAllConnectionTags (qh: QueryHandler) =
+            qh.Select<Records.ConnectionTag>("connection_tags")
+            

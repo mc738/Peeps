@@ -23,6 +23,8 @@ open Peeps.Monitoring.HealthChecks
 open Peeps.Logger
 open Giraffe.Middleware
 open Peeps.Sqlite
+open Peeps.Sqlite
+open Peeps.Store
 
 [<RequireQualifiedAccess>]
 module Routes =
@@ -102,14 +104,14 @@ let configureApp (app: IApplicationBuilder) =
        .UsePeepsHealthChecks()
        .UseGiraffe webApp
 
-let configureServices (services: IServiceCollection) =
+let configureServices startedOn (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsMonitorAgent("C:\\ProjectData\\WSTest")
         .AddGiraffe() |> ignore
     
     services.AddHealthChecks()
-            .AddPeepsHealthChecks(5000000L, 1000, DateTime.UtcNow)
+            .AddPeepsHealthChecks(5000000L, 1000, startedOn)
             |> ignore
 
 let configureLogging (peepsCtx: PeepsContext) (logging: ILoggingBuilder) =
@@ -119,52 +121,56 @@ let configureLogging (peepsCtx: PeepsContext) (logging: ILoggingBuilder) =
 [<EntryPoint>]
 let main argv =
 
-    let liveView (item: PeepsLogItem) =
-        let t =
-            match item.ItemType with
-            | LogItemType.Information -> "info"
-            | LogItemType.Debug -> "debug"
-            | LogItemType.Trace -> "trace"
-            | LogItemType.Error -> "error"
-            | LogItemType.Warning -> "warning"
-            | LogItemType.Critical -> "critical"
+    let pathArg =
+        match argv.Length > 0 with
+        | true -> Some argv.[0]
+        | false -> None
+        
+    match pathArg with
+    | Some path ->
+        let startedOn = DateTime.UtcNow
+        let runId = Guid.NewGuid()
+        
+        let liveView (item: PeepsLogItem) =
+            let message =
+                ({ Text = item.Message
+                   From = item.From
+                   Type = item.ItemType.Serialize()
+                   DateTime = item.TimeUtc }: Actions.Message)
 
-        let message =
-            ({ Text = item.Message
-               From = item.From
-               Type = t
-               DateTime = item.TimeUtc }: Actions.Message)
+            LiveView.sendMessageToSockets (System.Text.Json.JsonSerializer.Serialize message)
+            |> Async.RunSynchronously
 
-        LiveView.sendMessageToSockets (System.Text.Json.JsonSerializer.Serialize message)
-        |> Async.RunSynchronously
+        let logStore = LogStore(path, "test_api", runId, startedOn)
+        
+        use client = new HttpClient()
 
-    let dbWriter =
-        DbWriter("C:\\ProjectData\\WSTest\\logs", "peeps-test")
+        let actions =
+            [ Actions.writeToConsole
+              Actions.writeToStore logStore
+              liveView
+              //Actions.httpPost client "http://localhost:5000/message"
+              ]
 
-    use client = new HttpClient()
+        // Set up the Peeps context.
+        let peepsCtx =
+            PeepsContext.Create(AppContext.BaseDirectory, "Test", actions)
 
-    let actions =
-        [ Actions.writeToConsole
-          Actions.writeToDb dbWriter
-          liveView
-          //Actions.httpPost client "http://localhost:5000/message"
-          ]
+        Host
+            .CreateDefaultBuilder()
+            .ConfigureWebHostDefaults(fun webHostBuilder ->
+                webHostBuilder
+                    .UseKestrel()
+                    .UseUrls("http://localhost:20999;https://localhost:21000;")
+                    .Configure(configureApp)
+                    .ConfigureServices(configureServices startedOn)
+                    .ConfigureLogging(configureLogging peepsCtx)
+                |> ignore)
+            .Build()
+            .Run()
 
-    // Set up the Peeps context.
-    let peepsCtx =
-        PeepsContext.Create(AppContext.BaseDirectory, "Test", actions)
-
-    Host
-        .CreateDefaultBuilder()
-        .ConfigureWebHostDefaults(fun webHostBuilder ->
-            webHostBuilder
-                .UseKestrel()
-                .UseUrls("http://localhost:20999;https://localhost:21000;")
-                .Configure(configureApp)
-                .ConfigureServices(configureServices)
-                .ConfigureLogging(configureLogging peepsCtx)
-            |> ignore)
-        .Build()
-        .Run()
-
-    0 // return an integer exit code
+        0 // return an integer exit code
+    | None ->
+        printfn "Missing path arg."
+        -1
+    
