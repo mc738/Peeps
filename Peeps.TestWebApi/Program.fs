@@ -1,15 +1,10 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
-open System.Diagnostics
-open System.Diagnostics
 open System.Net.Http
-open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Diagnostics.HealthChecks
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.Diagnostics.HealthChecks
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
@@ -18,12 +13,7 @@ open Peeps
 open Peeps.Core
 open Peeps.Extensions
 open Peeps.Monitoring
-open Peeps.Monitoring
-open Peeps.Monitoring.HealthChecks
 open Peeps.Logger
-open Giraffe.Middleware
-open Peeps.Sqlite
-open Peeps.Sqlite
 open Peeps.Store
 
 [<RequireQualifiedAccess>]
@@ -41,7 +31,6 @@ module Routes =
 
             text "Info" next ctx
 
-
     let debug: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             let logger = ctx.GetLogger("Test")
@@ -49,7 +38,6 @@ module Routes =
             logger.LogDebug "Hello, from debug"
 
             text "Debug" next ctx
-
 
     let error: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) ->
@@ -59,7 +47,6 @@ module Routes =
 
             text "Error" next ctx
 
-
     let warn: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             let logger = ctx.GetLogger("Test")
@@ -67,9 +54,7 @@ module Routes =
             logger.LogWarning "Hello, from warning"
 
             text "Warn" next ctx
-            
-    
-    
+                
     let metrics: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             let logger = ctx.GetLogger("Test")
@@ -79,9 +64,31 @@ module Routes =
             let metrics = service.GetMetrics()
             json metrics next ctx
             
+    
+    let logCount: HttpHandler =
+        fun (next: HttpFunc) (ctx: HttpContext) ->
+            let logger = ctx.GetLogger("log_count")
+
+            logger.LogInformation "Hello, from log count"
+            let service = ctx.GetService<LogStore>()
+            let itemCount = service.ItemCount() |> string
+            text itemCount next ctx
+            
+    
+    let logConnection: HttpHandler =
+        fun (next: HttpFunc) (ctx: HttpContext) ->
+            let logger = ctx.GetLogger("log_connection")
+
+            logger.LogInformation "Hello, from log connect"
+            let service = ctx.GetService<LogStore>()
+            //let r =
+            match service.CheckConnection() with
+            | Ok _ -> 
+                text "Connection is ok" next ctx
+            | Result.Error e ->
+                text $"Log connection error: {e}" next ctx
     let fail: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) -> failwith "Unhandled exception."
-
 
 let webApp =
     choose [ route "/" >=> text "Hello, World!"
@@ -90,7 +97,9 @@ let webApp =
              route "/error" >=> Routes.error
              route "/warning" >=> Routes.warn
              route "/fail" >=> Routes.fail
-             route "/metrics" >=> Routes.metrics ]
+             route "/metrics" >=> Routes.metrics
+             route "/log/count" >=> Routes.logCount
+             route "/log/connection" >=> Routes.logConnection ]
 
 let configureApp (app: IApplicationBuilder) =
     
@@ -104,14 +113,15 @@ let configureApp (app: IApplicationBuilder) =
        .UsePeepsHealthChecks()
        .UseGiraffe webApp
 
-let configureServices startedOn (services: IServiceCollection) =
+let configureServices (store: LogStore) (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
+        .AddPeepsLogStore(store)
         .AddPeepsMonitorAgent("C:\\ProjectData\\WSTest")
         .AddGiraffe() |> ignore
     
     services.AddHealthChecks()
-            .AddPeepsHealthChecks(5000000L, 1000, startedOn)
+            .AddPeepsHealthChecks(5000000L, 1000, store.StartedOn)
             |> ignore
 
 let configureLogging (peepsCtx: PeepsContext) (logging: ILoggingBuilder) =
@@ -163,7 +173,7 @@ let main argv =
                     .UseKestrel()
                     .UseUrls("http://localhost:20999;https://localhost:21000;")
                     .Configure(configureApp)
-                    .ConfigureServices(configureServices startedOn)
+                    .ConfigureServices(configureServices logStore)
                     .ConfigureLogging(configureLogging peepsCtx)
                 |> ignore)
             .Build()

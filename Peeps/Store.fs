@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.IO
 open Freql.Sqlite
 open Peeps.Core
 
@@ -63,13 +64,17 @@ module Store =
             let logsPath = Path.Combine(path, "logs")
             
             if Directory.Exists logsPath |> not then Directory.CreateDirectory logsPath |> ignore
+            let filename = $"{name}-{runId:N}.log"
             
-            let qh = QueryHandler.Create(Path.Combine(path, "logs", $"{name}-{runId:N}.log"))
+            let qh = QueryHandler.Create(Path.Combine(logsPath, filename))
             initialize qh runId startedOn
+            File.WriteAllText(Path.Combine(logsPath, ".peeps_lock"), filename)
             qh
        
         type StoreAgentMessage =
             | LogItem of PeepsLogItem
+            | ItemCount of AsyncReplyChannel<int64>
+            | Ping of AsyncReplyChannel<unit>
             | Shutdown of AsyncReplyChannel<unit>
         
         let agent path name runId startedOn =
@@ -86,7 +91,13 @@ module Store =
                             match message with
                             | LogItem item ->
                                 addLogItem qh item
-                                return! loop(qh: QueryHandler)
+                                return! loop(qh)
+                            | ItemCount rc ->
+                                qh.ExecuteScalar("SELECT COUNT(*) FROM log_items") |> rc.Reply
+                                return! loop(qh)
+                            | Ping rc ->
+                                rc.Reply()
+                                return! loop(qh)
                             | Shutdown rc ->
                                 // TODO handle shutdown
                                 rc.Reply()
@@ -101,8 +112,17 @@ module Store =
             agent.Post(Internal.StoreAgentMessage.LogItem item)
             
         member ls.Shutdown() =
-            agent.PostAndReply(Internal.Shutdown)
+            agent.PostAndReply(Internal.StoreAgentMessage.Shutdown)
+         
+        member ls.ItemCount() =
+            agent.PostAndReply(fun rc -> Internal.StoreAgentMessage.ItemCount rc)
             
         member ls.StartedOn = startedOn
         
         member ls.RunId = runId
+        
+        /// Send a ping message to the agent and wait upto 5 seconds for a response.
+        member ls.CheckConnection() =
+            match agent.TryPostAndReply(Internal.StoreAgentMessage.Ping, timeout = 5000) with
+            | Some _ -> Ok ()
+            | None -> Result.Error "Did not receive response in 5 seconds."

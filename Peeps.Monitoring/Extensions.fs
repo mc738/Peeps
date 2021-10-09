@@ -7,6 +7,7 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Diagnostics.HealthChecks
 open Peeps.Monitoring.HealthChecks
 open Peeps.Monitoring.Middleware
+open Peeps.Store
 
 [<AutoOpen>]
 module Extensions =
@@ -48,6 +49,9 @@ module Extensions =
                 .UseMiddleware<PeepsLiveViewMiddleware>()
         
     type IServiceCollection with
+        
+        member builder.AddPeepsLogStore(store: LogStore) =
+            builder.AddSingleton<LogStore>(store)
         
         member builder.AddPeepsMonitorAgent(path) =
             builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path))
