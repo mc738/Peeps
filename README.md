@@ -4,40 +4,26 @@
 
 It is named after `Samual Peeps`, the idea is it will log what your application is doing as it burns.
 
-the core library contains an `ILogger` implementation
-
 The are 3 main projects:
 
-* `Peeps` - The core logging library.
+* `Peeps` - The core logging library and `ILogger` implementation.
 * `Peeps.Monitoring` - In-app Monitoring tools
   * LiveView - A live view of application logs served over `websockets`.
   * HealthChecks - A collection of standardized health checks.
   * Monitoring agent - A monitoring agent that can be wrapped around requests to handled uncaught errors and collect metrics.
 * `Peeps.Tools` - A collection of tools for working with peeps data and end points. 
 
-## Store
+## LogStore
 
 `Store.fs` contains a `Sqlite` backed store for log items.
 This uses an agent so should be a singleton.
 
-It can be added as an action (example correct  `v-0.3.0`):
-```fsharp
-let runId = Guid.NewGuid()
-let startedOn = DateTime.UtcNow
+Set `Set up` section for examples of using the log store.
 
-...
+The store will create a database with the naming convention `"{name}-{runId:N}.log"`,
+in a `[APPDATA]/log` directory. 
 
-// Create the log store
-let logStore = LogStore(path, "test_api", runId, startedOn)
- 
-// Create action list.
-let actions = [ Actions.writeToStore logStore ]
-      
-// Set up the Peeps context.
-let peepsCtx =
-    PeepsContext.Create(AppContext.BaseDirectory, "Test", actions)
-```
-*Example version `v-0.3.0`*
+Also the file `.peeps_lock` will be created/overwritten with the name of the current lock.
 
 ## Actions
 
@@ -98,7 +84,7 @@ let configureApp (app: IApplicationBuilder) =
 *Example version `v-0.3.0`*
 
 ## Configuring services
-```fhsarp
+```fsharp
 let configureServices (store: LogStore) (services: IServiceCollection) =
   services
       // Adds the LogStore as singleton service. 
