@@ -24,10 +24,12 @@ module Routes =
             let logger = ctx.GetLogger("Test")
             use scope = logger.BeginScope("test", "")
             let corrRef = ctx.Items.["corr_ref"] :?> Guid
+            let ip = ctx.Items.["ip_address"]
 
 
             logger.LogInformation "Hello, from info"
             logger.LogInformation $"Correlation ref: {corrRef}"
+            logger.LogInformation $"IP: {ip}"
 
             text "Info" next ctx
 
@@ -117,7 +119,7 @@ let configureServices (store: LogStore) (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsLogStore(store)
-        .AddPeepsMonitorAgent("C:\\ProjectData\\WSTest")
+        .AddPeepsMonitorAgent(store.Path)
         .AddGiraffe() |> ignore
     
     services.AddHealthChecks()
@@ -171,7 +173,7 @@ let main argv =
             .ConfigureWebHostDefaults(fun webHostBuilder ->
                 webHostBuilder
                     .UseKestrel()
-                    .UseUrls("http://localhost:20999;https://localhost:21000;")
+                    .UseUrls("http://0.0.0.0:20999;https://0.0.0.0:21000;")
                     .Configure(configureApp)
                     .ConfigureServices(configureServices logStore)
                     .ConfigureLogging(configureLogging peepsCtx)

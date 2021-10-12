@@ -121,6 +121,8 @@ module Store =
         
         member ls.RunId = runId
         
+        member ls.Path = path
+        
         /// Send a ping message to the agent and wait upto 5 seconds for a response.
         member ls.CheckConnection() =
             match agent.TryPostAndReply(Internal.StoreAgentMessage.Ping, timeout = 5000) with

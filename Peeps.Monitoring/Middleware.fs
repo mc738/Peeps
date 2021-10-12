@@ -18,9 +18,12 @@ module Middleware =
                 stopwatch.Start()
                 let corrRef = Guid.NewGuid()
                 let ma = ctx.GetService<PeepsMonitorAgent>()
+                
+                let ipAddress = ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()
 
                 ma.SaveRequest(
                     corrRef,
+                    ipAddress,
                     ctx.Request.ContentLength
                     |> Option.ofNullable
                     |> Option.defaultValue 0L,
@@ -28,6 +31,7 @@ module Middleware =
                 )
 
                 ctx.Items.Add("corr_ref", corrRef)
+                ctx.Items.Add("ip_address", ipAddress)
 
                 try
                     do! next.Invoke(ctx) |> Async.AwaitTask
