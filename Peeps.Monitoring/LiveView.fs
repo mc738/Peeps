@@ -4,6 +4,8 @@ open System
 open System.Net.WebSockets
 open System.Text
 open System.Threading
+open Peeps
+open Peeps.Core
 
 module LiveView =
     let mutable sockets = list<WebSocket>.Empty
@@ -24,7 +26,8 @@ module LiveView =
                     |> Async.AwaitTask
             else
                 sockets <- removeSocket sockets socket
-        }   
+        }
+        
     let sendMessageToSockets =
         fun message ->
             async {
@@ -34,3 +37,13 @@ module LiveView =
                     with
                         | ex -> printfn $"{socket.State} {ex.Message}"; sockets <- removeSocket sockets socket
             }
+            
+    let logAction (item: PeepsLogItem) =
+        let message =
+                ({ Text = item.Message
+                   From = item.From
+                   Type = item.ItemType.Serialize()
+                   DateTime = item.TimeUtc }: Actions.Message)
+
+        sendMessageToSockets (System.Text.Json.JsonSerializer.Serialize message)
+        |> Async.RunSynchronously

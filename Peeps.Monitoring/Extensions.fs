@@ -7,6 +7,7 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Diagnostics.HealthChecks
 open Peeps.Monitoring.HealthChecks
 open Peeps.Monitoring.Middleware
+open Peeps.Monitoring.RateLimiting
 open Peeps.Store
 
 [<AutoOpen>]
@@ -55,3 +56,6 @@ module Extensions =
         
         member builder.AddPeepsMonitorAgent(path) =
             builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path))
+            
+        member builder.AddPeepsRateLimiting(limit) =
+            builder.AddSingleton<RateLimitingAgent>(fun _ -> RateLimitingAgent(limit))

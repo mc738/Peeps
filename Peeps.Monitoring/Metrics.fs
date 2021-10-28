@@ -69,7 +69,6 @@ type AgentMessage =
     | Critical of ResponsePost
     | GetMetrics of AsyncReplyChannel<AppMetrics>
 
-
 type AgentState =
     { Writer: QueryHandler
       Requests: int64
