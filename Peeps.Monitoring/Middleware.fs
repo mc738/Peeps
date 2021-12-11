@@ -6,6 +6,7 @@ open System.Threading.Tasks
 open Microsoft.AspNetCore.Http
 open Giraffe
 open Microsoft.Extensions.Logging
+open Peeps.Monitoring.RateLimiting
 
 module Middleware =
 
@@ -18,51 +19,60 @@ module Middleware =
                 stopwatch.Start()
                 let corrRef = Guid.NewGuid()
                 let ma = ctx.GetService<PeepsMonitorAgent>()
+                let rla = ctx.GetService<RateLimitingAgent>()
+                
+                let ipAddress = ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()
 
-                ma.SaveRequest(
-                    corrRef,
-                    ctx.Request.ContentLength
-                    |> Option.ofNullable
-                    |> Option.defaultValue 0L,
-                    ctx.GetRequestUrl()
-                )
-
-                ctx.Items.Add("corr_ref", corrRef)
-
-                try
-                    do! next.Invoke(ctx) |> Async.AwaitTask
-                    stopwatch.Stop()
-
-                    let outcome =
-                        match ctx.Response.StatusCode < 400 with
-                        | true -> ma.SaveResponse
-                        | false -> ma.SaveError
-
-                    outcome (
+                match rla.InLimit(ipAddress) with
+                | true ->
+                    ma.SaveRequest(
                         corrRef,
-                        ctx.Response.ContentLength
+                        ipAddress,
+                        ctx.Request.ContentLength
                         |> Option.ofNullable
                         |> Option.defaultValue 0L,
-                        ctx.Response.StatusCode,
-                        stopwatch.ElapsedMilliseconds
+                        ctx.GetRequestUrl()
                     )
 
-                with
-                | ex ->
-                    stopwatch.Stop()
-                    let logger = ctx.GetLogger("peeps-monitor")
-                    logger.LogCritical($"Unhandled exception in route '{ctx.GetRequestUrl()}'. Error: {ex.Message}")
-                    ctx.Response.StatusCode <- 500
+                    ctx.Items.Add("corr_ref", corrRef)
+                    ctx.Items.Add("ip_address", ipAddress)
 
-                    ma.SaveCritical(
-                        corrRef,
-                        ctx.Response.ContentLength
-                        |> Option.ofNullable
-                        |> Option.defaultValue 0L,
-                        ctx.Response.StatusCode,
-                        stopwatch.ElapsedMilliseconds
-                    )
-            }
+                    try
+                        do! next.Invoke(ctx) |> Async.AwaitTask
+                        stopwatch.Stop()
+
+                        let outcome =
+                            match ctx.Response.StatusCode < 400 with
+                            | true -> ma.SaveResponse
+                            | false -> ma.SaveError
+
+                        outcome (
+                            corrRef,
+                            ctx.Response.ContentLength
+                            |> Option.ofNullable
+                            |> Option.defaultValue 0L,
+                            ctx.Response.StatusCode,
+                            stopwatch.ElapsedMilliseconds
+                        )
+
+                    with
+                    | ex ->
+                        stopwatch.Stop()
+                        let logger = ctx.GetLogger("peeps-monitor")
+                        logger.LogCritical($"Unhandled exception in route '{ctx.GetRequestUrl()}'. Error: {ex.Message}")
+                        ctx.Response.StatusCode <- 500
+
+                        ma.SaveCritical(
+                            corrRef,
+                            ctx.Response.ContentLength
+                            |> Option.ofNullable
+                            |> Option.defaultValue 0L,
+                            ctx.Response.StatusCode,
+                            stopwatch.ElapsedMilliseconds
+                        )
+                | false ->
+                    ctx.Response.StatusCode <- 429
+                }
             |> Async.StartAsTask
             :> Task
 

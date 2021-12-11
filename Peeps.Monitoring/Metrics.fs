@@ -6,6 +6,7 @@ open Freql.Sqlite
 
 type RequestPost =
     { CorrelationReference: Guid
+      IpAddress: string
       RequestTime: DateTime
       RequestSize: int64
       Url: string }
@@ -30,6 +31,7 @@ module Internal =
         """
     CREATE TABLE requests (
 		correlation_reference TEXT NOT NULL,
+        ip_address TEXT NOT NULL,
         request_time TEXT NOT NULL,
 		request_size TEXT NOT NULL,
 		url TEXT,
@@ -66,7 +68,6 @@ type AgentMessage =
     | Error of ResponsePost
     | Critical of ResponsePost
     | GetMetrics of AsyncReplyChannel<AppMetrics>
-
 
 type AgentState =
     { Writer: QueryHandler
@@ -144,8 +145,9 @@ type PeepsMonitorAgent(path: string) =
 
                 loop (AgentState.Create(qh)))
 
-    member _.SaveRequest(correlationRef: Guid, size: int64, url: string) =
+    member _.SaveRequest(correlationRef: Guid, ipAddress: string, size: int64, url: string) =
         { CorrelationReference = correlationRef
+          IpAddress = ipAddress
           RequestTime = DateTime.UtcNow
           RequestSize = size
           Url = url }

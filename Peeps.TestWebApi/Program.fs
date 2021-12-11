@@ -10,7 +10,6 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Giraffe
 open Peeps
-open Peeps.Core
 open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Logger
@@ -24,10 +23,12 @@ module Routes =
             let logger = ctx.GetLogger("Test")
             use scope = logger.BeginScope("test", "")
             let corrRef = ctx.Items.["corr_ref"] :?> Guid
+            let ip = ctx.Items.["ip_address"]
 
 
             logger.LogInformation "Hello, from info"
             logger.LogInformation $"Correlation ref: {corrRef}"
+            logger.LogInformation $"IP: {ip}"
 
             text "Info" next ctx
 
@@ -64,7 +65,6 @@ module Routes =
             let metrics = service.GetMetrics()
             json metrics next ctx
             
-    
     let logCount: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             let logger = ctx.GetLogger("log_count")
@@ -74,7 +74,6 @@ module Routes =
             let itemCount = service.ItemCount() |> string
             text itemCount next ctx
             
-    
     let logConnection: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             let logger = ctx.GetLogger("log_connection")
@@ -87,6 +86,7 @@ module Routes =
                 text "Connection is ok" next ctx
             | Result.Error e ->
                 text $"Log connection error: {e}" next ctx
+                
     let fail: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) -> failwith "Unhandled exception."
 
@@ -117,7 +117,8 @@ let configureServices (store: LogStore) (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsLogStore(store)
-        .AddPeepsMonitorAgent("C:\\ProjectData\\WSTest")
+        .AddPeepsMonitorAgent(store.Path)
+        .AddPeepsRateLimiting(10)
         .AddGiraffe() |> ignore
     
     services.AddHealthChecks()
@@ -141,16 +142,6 @@ let main argv =
         let startedOn = DateTime.UtcNow
         let runId = Guid.NewGuid()
         
-        let liveView (item: PeepsLogItem) =
-            let message =
-                ({ Text = item.Message
-                   From = item.From
-                   Type = item.ItemType.Serialize()
-                   DateTime = item.TimeUtc }: Actions.Message)
-
-            LiveView.sendMessageToSockets (System.Text.Json.JsonSerializer.Serialize message)
-            |> Async.RunSynchronously
-
         let logStore = LogStore(path, "test_api", runId, startedOn)
         
         use client = new HttpClient()
@@ -158,7 +149,7 @@ let main argv =
         let actions =
             [ Actions.writeToConsole
               Actions.writeToStore logStore
-              liveView
+              LiveView.logAction
               //Actions.httpPost client "http://localhost:5000/message"
               ]
 
@@ -171,7 +162,7 @@ let main argv =
             .ConfigureWebHostDefaults(fun webHostBuilder ->
                 webHostBuilder
                     .UseKestrel()
-                    .UseUrls("http://localhost:20999;https://localhost:21000;")
+                    .UseUrls("http://0.0.0.0:20999;https://0.0.0.0:21000;")
                     .Configure(configureApp)
                     .ConfigureServices(configureServices logStore)
                     .ConfigureLogging(configureLogging peepsCtx)
@@ -183,4 +174,3 @@ let main argv =
     | None ->
         printfn "Missing path arg."
         -1
-    
