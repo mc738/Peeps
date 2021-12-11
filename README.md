@@ -4,6 +4,8 @@
 
 It is named after `Samual Peeps`, the idea is it will log what your application is doing as it burns.
 
+**NOTE** I now realise his name was `Samuel Pepys`.
+
 The are 3 main projects:
 
 * `Peeps` - The core logging library and `ILogger` implementation.
