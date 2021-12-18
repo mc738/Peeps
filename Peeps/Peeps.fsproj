@@ -20,11 +20,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Freql.Sqlite" Version="0.4.1" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\Freql\Freql.Sqlite\Freql.Sqlite.fsproj" />
     </ItemGroup>
 
 </Project>

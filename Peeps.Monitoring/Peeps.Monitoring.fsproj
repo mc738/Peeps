@@ -20,12 +20,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Freql.Sqlite" Version="0.4.1" />
       <PackageReference Include="Giraffe" Version="5.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Freql\Freql.Sqlite\Freql.Sqlite.fsproj" />
       <ProjectReference Include="..\Peeps\Peeps.fsproj" />
     </ItemGroup>
 
