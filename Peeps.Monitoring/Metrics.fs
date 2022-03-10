@@ -3,6 +3,7 @@
 open System
 open System.IO
 open Freql.Sqlite
+open Peeps.Monitoring
 
 type RequestPost =
     { CorrelationReference: Guid
@@ -42,9 +43,9 @@ module Internal =
 	);
     """
 
-    let saveRequest (qh: QueryHandler) (request: RequestPost) = qh.Insert("requests", request)
+    let saveRequest (qh: SqliteContext) (request: RequestPost) = qh.Insert("requests", request)
 
-    let saveResponse (qh: QueryHandler) (response: ResponsePost) =
+    let saveResponse (qh: SqliteContext) (response: ResponsePost) =
         let sql =
             """
         UPDATE requests
@@ -66,17 +67,17 @@ type AgentMessage =
     | Request of RequestPost
     | Response of ResponsePost
     | Error of ResponsePost
-    | Critical of ResponsePost
+    | Critical of ResponsePost * exn
     | GetMetrics of AsyncReplyChannel<AppMetrics>
 
 type AgentState =
-    { Writer: QueryHandler
+    { Writer: SqliteContext
       Requests: int64
       Errors: int64
       Criticals: int64
       BytesReceived: int64
       BytesSent: int64 }
-    static member Create(qh: QueryHandler) =
+    static member Create(qh: SqliteContext) =
         { Writer = qh
           Requests = 0L
           Errors = 0L
@@ -92,7 +93,7 @@ type AgentState =
         BytesSent = s.BytesSent
     }: AppMetrics)
 
-type PeepsMonitorAgent(path: string) =
+type PeepsMonitorAgent(path: string, criticalHandlers: (ResponsePost -> exn -> unit) list) =
 
     let agent =
         MailboxProcessor<AgentMessage>.Start
@@ -123,9 +124,10 @@ type PeepsMonitorAgent(path: string) =
                                 { state with
                                       Errors = state.Errors + 1L
                                       BytesSent = state.BytesSent + r.Size }
-                            | AgentMessage.Critical r ->
+                            | AgentMessage.Critical (r, exn) ->
                                 Internal.saveResponse state.Writer r
-
+                                
+                                criticalHandlers |> List.iter (fun h -> h r exn)
                                 { state with
                                       Errors = state.Criticals + 1L
                                       BytesSent = state.BytesSent + r.Size }
@@ -138,7 +140,7 @@ type PeepsMonitorAgent(path: string) =
 
                 // Create the db.
                 let qh =
-                    QueryHandler.Create(Path.Combine(path, $"metrics_{DateTime.UtcNow:yyyyMMddHHmmss}.db"))
+                    SqliteContext.Create(Path.Combine(path, $"metrics_{DateTime.UtcNow:yyyyMMddHHmmss}.db"))
 
                 qh.ExecuteSqlNonQuery Internal.requestsTableSql
                 |> ignore
@@ -170,13 +172,13 @@ type PeepsMonitorAgent(path: string) =
         |> AgentMessage.Error
         |> agent.Post
 
-    member _.SaveCritical(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
-        { CorrelationReference = correlationRef
-          Size = size
-          ResponseCode = responseCode
-          Time = time }
+    member _.SaveCritical(correlationRef: Guid, size: int64, responseCode: int, time: int64, exn: Exception) =
+        ({ CorrelationReference = correlationRef
+           Size = size
+           ResponseCode = responseCode
+           Time = time }, exn)
         |> AgentMessage.Critical
         |> agent.Post
 
     member _.GetMetrics() =
-        agent.PostAndReply<AppMetrics>(fun rc -> AgentMessage.GetMetrics rc)        
+        agent.PostAndReply<AppMetrics>(fun rc -> AgentMessage.GetMetrics rc)

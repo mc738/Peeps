@@ -9,6 +9,7 @@
     <ItemGroup>
         <Compile Include="Library.fs" />
         <Compile Include="InfrastructureMapping.fs" />
+        <Compile Include="HealthCheckReporting.fs" />
     </ItemGroup>
 
     <ItemGroup>

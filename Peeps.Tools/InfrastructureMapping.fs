@@ -217,7 +217,7 @@ module InfrastructureMapping =
 
             type ConnectionTag = { ComponentId: string; Tag: string }
 
-        let initialize (qh: QueryHandler) =
+        let initialize (ctx: SqliteContext) =
             [ Internal.tagsTable
               Internal.documentsTable
               Internal.componentsTable
@@ -228,36 +228,36 @@ module InfrastructureMapping =
               Internal.connectionDocumentsTable
               Internal.connectionMetadataTable
               Internal.connectionTagsTable ]
-            |> List.map qh.ExecuteSqlNonQuery
+            |> List.map ctx.ExecuteSqlNonQuery
             |> ignore
 
-        let addTag (qh: QueryHandler) (tag: Records.Tag) = qh.Insert("tags", tag)
+        let addTag (ctx: SqliteContext) (tag: Records.Tag) = ctx.Insert("tags", tag)
 
-        let addDocument (qh: QueryHandler) (document: Records.Document) = qh.Insert("documents", document)
+        let addDocument (ctx: SqliteContext) (document: Records.Document) = ctx.Insert("documents", document)
 
-        let addComponent (qh: QueryHandler) (comp: Records.Component) = qh.Insert("components", comp)
+        let addComponent (ctx: SqliteContext) (comp: Records.Component) = ctx.Insert("components", comp)
 
-        let addComponentDocument (qh: QueryHandler) (componentDocument: Records.ComponentDocument) =
-            qh.Insert("component_documents", componentDocument)
+        let addComponentDocument (ctx: SqliteContext) (componentDocument: Records.ComponentDocument) =
+            ctx.Insert("component_documents", componentDocument)
 
-        let addComponentMetadata (qh: QueryHandler) (componentMetadata: Records.ComponentMetadata) =
-            qh.Insert("component_metadata", componentMetadata)
+        let addComponentMetadata (ctx: SqliteContext) (componentMetadata: Records.ComponentMetadata) =
+            ctx.Insert("component_metadata", componentMetadata)
 
-        let addComponentTag (qh: QueryHandler) (componentTag: Records.ComponentTags) =
-            qh.Insert("component_tags", componentTag)
+        let addComponentTag (ctx: SqliteContext) (componentTag: Records.ComponentTags) =
+            ctx.Insert("component_tags", componentTag)
 
-        let addConnection (qh: QueryHandler) (connection: Records.Connection) = qh.Insert("connections", connection)
+        let addConnection (ctx: SqliteContext) (connection: Records.Connection) = ctx.Insert("connections", connection)
 
-        let addConnectionDocument (qh: QueryHandler) (connectionDocument: Records.ConnectionDocument) =
-            qh.Insert("connection_documents", connectionDocument)
+        let addConnectionDocument (ctx: SqliteContext) (connectionDocument: Records.ConnectionDocument) =
+            ctx.Insert("connection_documents", connectionDocument)
 
-        let addConnectionMetadata (qh: QueryHandler) (connectionMetadata: Records.ConnectionMetadata) =
-            qh.Insert("connection_metadata", connectionMetadata)
+        let addConnectionMetadata (ctx: SqliteContext) (connectionMetadata: Records.ConnectionMetadata) =
+            ctx.Insert("connection_metadata", connectionMetadata)
 
-        let addConnectionTag (qh: QueryHandler) (connectionTag: Records.ConnectionTag) =
-            qh.Insert("connection_tags", connectionTag)
+        let addConnectionTag (ctx: SqliteContext) (connectionTag: Records.ConnectionTag) =
+            ctx.Insert("connection_tags", connectionTag)
 
-        let getComponent (qh: QueryHandler) (id: string) =
+        let getComponent (ctx: SqliteContext) (id: string) =
             let sql =
                 """
 			SELECT id, name, description, x, y
@@ -265,12 +265,12 @@ module InfrastructureMapping =
 			WHERE id = @0;
 			"""
 
-            qh.SelectSingleAnon<Records.Component>(sql, [ id ])
+            ctx.SelectSingleAnon<Records.Component>(sql, [ id ])
 
-        let getAllComponents (qh: QueryHandler) =
-            qh.Select<Records.Component>("components")
+        let getAllComponents (ctx: SqliteContext) =
+            ctx.Select<Records.Component>("components")
 
-        let getDocument (qh: QueryHandler) (id: string) =
+        let getDocument (ctx: SqliteContext) (id: string) =
             let sql =
                 """
 			SELECT id, name, description, document
@@ -278,28 +278,28 @@ module InfrastructureMapping =
 			WHERE id = @0;
 			"""
 
-            qh.SelectSingleAnon<Records.Document>(sql, [ id ])
+            ctx.SelectSingleAnon<Records.Document>(sql, [ id ])
 
-        let getAllTags (qh: QueryHandler) = qh.Select<Records.Tag>("tags")
+        let getAllTags (ctx: SqliteContext) = ctx.Select<Records.Tag>("tags")
 
-        let getAllComponentMetadata (qh: QueryHandler) =
-            qh.Select<Records.ComponentMetadata>("components_metadata")
+        let getAllComponentMetadata (ctx: SqliteContext) =
+            ctx.Select<Records.ComponentMetadata>("components_metadata")
 
-        let getAllComponentTags (qh: QueryHandler) =
-            qh.Select<Records.ComponentTags>("component_tags")
+        let getAllComponentTags (ctx: SqliteContext) =
+            ctx.Select<Records.ComponentTags>("component_tags")
 
-        let getAllComponentDocuments (qh: QueryHandler) =
-            qh.Select<Records.ComponentDocument>("component_documents")
+        let getAllComponentDocuments (ctx: SqliteContext) =
+            ctx.Select<Records.ComponentDocument>("component_documents")
 
-        let getAllConnections (qh: QueryHandler) =
-            qh.Select<Records.Connection>("connections")
+        let getAllConnections (ctx: SqliteContext) =
+            ctx.Select<Records.Connection>("connections")
 
-        let getAllConnectionDocuments (qh: QueryHandler) =
-            qh.Select<Records.ConnectionDocument>("connection_documents")
+        let getAllConnectionDocuments (ctx: SqliteContext) =
+            ctx.Select<Records.ConnectionDocument>("connection_documents")
 
-        let getAllConnectionMetadata (qh: QueryHandler) =
-            qh.Select<Records.ConnectionMetadata>("connection_metadata")
+        let getAllConnectionMetadata (ctx: SqliteContext) =
+            ctx.Select<Records.ConnectionMetadata>("connection_metadata")
 
-        let getAllConnectionTags (qh: QueryHandler) =
-            qh.Select<Records.ConnectionTag>("connection_tags")
+        let getAllConnectionTags (ctx: SqliteContext) =
+            ctx.Select<Records.ConnectionTag>("connection_tags")
             
