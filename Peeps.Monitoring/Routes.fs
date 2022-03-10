@@ -30,7 +30,3 @@ module PeepsMetricRoutes =
         [ GET
         >=> choose [ route "/metrics/requests/" >=> warbler (fun _ -> requestMetrics)
                      route "/metrics/log/" >=> warbler (fun _ -> logMetrics) ] ]
-
-
-
-
