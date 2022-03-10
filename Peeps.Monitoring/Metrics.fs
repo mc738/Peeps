@@ -67,7 +67,7 @@ type AgentMessage =
     | Request of RequestPost
     | Response of ResponsePost
     | Error of ResponsePost
-    | Critical of ResponsePost
+    | Critical of ResponsePost * exn
     | GetMetrics of AsyncReplyChannel<AppMetrics>
 
 type AgentState =
@@ -93,7 +93,7 @@ type AgentState =
         BytesSent = s.BytesSent
     }: AppMetrics)
 
-type PeepsMonitorAgent(path: string, criticalHandlers: (ResponsePost -> unit) list) =
+type PeepsMonitorAgent(path: string, criticalHandlers: (ResponsePost -> exn -> unit) list) =
 
     let agent =
         MailboxProcessor<AgentMessage>.Start
@@ -124,10 +124,10 @@ type PeepsMonitorAgent(path: string, criticalHandlers: (ResponsePost -> unit) li
                                 { state with
                                       Errors = state.Errors + 1L
                                       BytesSent = state.BytesSent + r.Size }
-                            | AgentMessage.Critical r ->
+                            | AgentMessage.Critical (r, exn) ->
                                 Internal.saveResponse state.Writer r
                                 
-                                criticalHandlers |> List.iter (fun h -> h r)
+                                criticalHandlers |> List.iter (fun h -> h r exn)
                                 { state with
                                       Errors = state.Criticals + 1L
                                       BytesSent = state.BytesSent + r.Size }
@@ -172,11 +172,11 @@ type PeepsMonitorAgent(path: string, criticalHandlers: (ResponsePost -> unit) li
         |> AgentMessage.Error
         |> agent.Post
 
-    member _.SaveCritical(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
-        { CorrelationReference = correlationRef
-          Size = size
-          ResponseCode = responseCode
-          Time = time }
+    member _.SaveCritical(correlationRef: Guid, size: int64, responseCode: int, time: int64, exn: Exception) =
+        ({ CorrelationReference = correlationRef
+           Size = size
+           ResponseCode = responseCode
+           Time = time }, exn)
         |> AgentMessage.Critical
         |> agent.Post
 

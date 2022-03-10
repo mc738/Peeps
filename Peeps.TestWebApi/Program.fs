@@ -1,6 +1,7 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
+open System.IO
 open System.Net.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
@@ -113,11 +114,19 @@ let configureApp (app: IApplicationBuilder) =
        .UsePeepsHealthChecks()
        .UseGiraffe webApp
 
+
+let saveErrorToFile (response: ResponsePost) (ex: exn) =
+    File.WriteAllText($"C:\\ProjectData\\Peeps\\errors\\{DateTime.UtcNow:yyyyMMddHHmmss}_{response.CorrelationReference}.error", ex.ToString())
+
+let criticalHandlers = [
+    saveErrorToFile
+]
+
 let configureServices (store: LogStore) (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsLogStore(store)
-        .AddPeepsMonitorAgent(store.Path, [])
+        .AddPeepsMonitorAgent(store.Path, criticalHandlers)
         .AddPeepsRateLimiting(10)
         .AddGiraffe() |> ignore
     

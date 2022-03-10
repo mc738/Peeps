@@ -20,8 +20,9 @@ module Middleware =
                 let corrRef = Guid.NewGuid()
                 let ma = ctx.GetService<PeepsMonitorAgent>()
                 let rla = ctx.GetService<RateLimitingAgent>()
-                
-                let ipAddress = ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()
+
+                let ipAddress =
+                    ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()
 
                 match rla.InLimit(ipAddress) with
                 | true ->
@@ -68,11 +69,11 @@ module Middleware =
                             |> Option.ofNullable
                             |> Option.defaultValue 0L,
                             ctx.Response.StatusCode,
-                            stopwatch.ElapsedMilliseconds
+                            stopwatch.ElapsedMilliseconds,
+                            ex
                         )
-                | false ->
-                    ctx.Response.StatusCode <- 429
-                }
+                | false -> ctx.Response.StatusCode <- 429
+            }
             |> Async.StartAsTask
             :> Task
 
