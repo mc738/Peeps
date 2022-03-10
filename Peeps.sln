@@ -12,15 +12,11 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.TestConsole", "Peeps.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.TestWebApi", "Peeps.TestWebApi\Peeps.TestWebApi.fsproj", "{F220D0CD-1E7F-4EA3-B1D5-9EA0A45C0B63}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{0935A32C-DA6A-410D-85FF-A2D2B853BC0C}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Monitoring", "Peeps.Monitoring\Peeps.Monitoring.fsproj", "{8D5F2864-28D1-47C9-98D3-24889F02324A}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Monitoring.Server", "Peeps.Monitoring.Server\Peeps.Monitoring.Server.fsproj", "{1CBBFA43-E9F5-46A0-9B65-13D77ECBBD12}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peeps.Monitoring.WebApp", "Peeps.Monitoring.WebApp\Peeps.Monitoring.WebApp.csproj", "{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fluff.Razor", "..\Fluff\Fluff.Razor\Fluff.Razor.fsproj", "{D8764069-D33A-4ED7-AA42-925592DE7D01}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Peeps.Tools", "Peeps.Tools\Peeps.Tools.fsproj", "{A543129C-674F-49C0-B7D9-6D8FF200DFCB}"
 EndProject
@@ -56,10 +52,6 @@ Global
 		{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAA9C1D6-05E6-4FF0-BE2C-54CB797AD1C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D8764069-D33A-4ED7-AA42-925592DE7D01}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A543129C-674F-49C0-B7D9-6D8FF200DFCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A543129C-674F-49C0-B7D9-6D8FF200DFCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A543129C-674F-49C0-B7D9-6D8FF200DFCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -70,6 +62,5 @@ Global
 		{0530403A-6D98-4D90-A5DD-56D54340EF18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{D8764069-D33A-4ED7-AA42-925592DE7D01} = {0935A32C-DA6A-410D-85FF-A2D2B853BC0C}
 	EndGlobalSection
 EndGlobal

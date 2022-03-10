@@ -10,18 +10,18 @@ let test path =
     let fullPath =
         Path.Combine(path, $"infrastructure_map-{DateTime.UtcNow:yyyyMMddHHmmss}")
 
-    let qh = QueryHandler.Create fullPath
-    Store.initialize qh
+    let ctx = SqliteContext.Create fullPath
+    Store.initialize ctx
 
     Store.addComponent
-        qh
+        ctx
         ({ Id = "test_1"
            Name = "Test 1"
            Description = "Test component"
            X = 10
            Y = 10 }: Records.Component)
         
-    let c = Store.getComponent qh "test_1"
+    let c = Store.getComponent ctx "test_1"
         
     printfn $"{c}"
 

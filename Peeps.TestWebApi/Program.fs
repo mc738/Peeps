@@ -117,7 +117,7 @@ let configureServices (store: LogStore) (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsLogStore(store)
-        .AddPeepsMonitorAgent(store.Path)
+        .AddPeepsMonitorAgent(store.Path, [])
         .AddPeepsRateLimiting(10)
         .AddGiraffe() |> ignore
     

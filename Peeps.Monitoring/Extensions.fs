@@ -54,8 +54,8 @@ module Extensions =
         member builder.AddPeepsLogStore(store: LogStore) =
             builder.AddSingleton<LogStore>(store)
         
-        member builder.AddPeepsMonitorAgent(path) =
-            builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path))
+        member builder.AddPeepsMonitorAgent(path, criticalHandlers) =
+            builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path, criticalHandlers))
             
         member builder.AddPeepsRateLimiting(limit) =
             builder.AddSingleton<RateLimitingAgent>(fun _ -> RateLimitingAgent(limit))
