@@ -1,12 +1,7 @@
 ﻿// Learn more about F# at http://fsharp.org
 
-open System
-open System.Threading.Tasks
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
-open Microsoft.Extensions.Logging
-open Peeps.PeepsLogger
-open Peeps.Extensions
 
 let createHostBuilder (args) =
     Host

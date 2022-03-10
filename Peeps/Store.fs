@@ -50,15 +50,15 @@ module Store =
                   Name = item.From
                   Message = item.Message }
 
-        let addLogItem (qh: QueryHandler) (item: PeepsLogItem) = qh.Insert("log_items", LogItemRecord.FromLogItem item)
+        let addLogItem (ctx: SqliteContext) (item: PeepsLogItem) = ctx.Insert("log_items", LogItemRecord.FromLogItem item)
 
-        let initialize (qh: QueryHandler) (runId: Guid) (startedOn: DateTime) =
+        let initialize (ctx: SqliteContext) (runId: Guid) (startedOn: DateTime) =
             [ runStatsTableSql
               logsTableSql ]
-            |> List.map qh.ExecuteSqlNonQuery
+            |> List.map ctx.ExecuteSqlNonQuery
             |> ignore
 
-            qh.Insert("run_stats", ({ RunId = runId.ToString(); StartedOn = startedOn }: RunStatsRecord))
+            ctx.Insert("run_stats", ({ RunId = runId.ToString(); StartedOn = startedOn }: RunStatsRecord))
             
         let create (path: string) (name: string) (runId: Guid) (startedOn: DateTime) =
             let logsPath = Path.Combine(path, "logs")
@@ -66,10 +66,10 @@ module Store =
             if Directory.Exists logsPath |> not then Directory.CreateDirectory logsPath |> ignore
             let filename = $"{name}-{runId:N}.log"
             
-            let qh = QueryHandler.Create(Path.Combine(logsPath, filename))
-            initialize qh runId startedOn
+            let ctx = SqliteContext.Create(Path.Combine(logsPath, filename))
+            initialize ctx runId startedOn
             File.WriteAllText(Path.Combine(logsPath, ".peeps_lock"), filename)
-            qh
+            ctx
        
         type StoreAgentMessage =
             | LogItem of PeepsLogItem
@@ -81,29 +81,29 @@ module Store =
             
             printfn $"Starting `{name}` peeps logger store agent."
             printfn "Initializing Peeps database."
-            let qh = create path name runId startedOn
+            let ctx = create path name runId startedOn
             
             MailboxProcessor<StoreAgentMessage>
                 .Start(fun inbox ->
-                    let rec loop(qh: QueryHandler) =
+                    let rec loop(ctx: SqliteContext) =
                         async {
                             let! message = inbox.Receive()
                             match message with
                             | LogItem item ->
-                                addLogItem qh item
-                                return! loop(qh)
+                                addLogItem ctx item
+                                return! loop(ctx)
                             | ItemCount rc ->
-                                qh.ExecuteScalar("SELECT COUNT(*) FROM log_items") |> rc.Reply
-                                return! loop(qh)
+                                ctx.ExecuteScalar("SELECT COUNT(*) FROM log_items") |> rc.Reply
+                                return! loop(ctx)
                             | Ping rc ->
                                 rc.Reply()
-                                return! loop(qh)
+                                return! loop(ctx)
                             | Shutdown rc ->
                                 // TODO handle shutdown
                                 rc.Reply()
                         }
                     // Get the connection and start listening.
-                    loop (qh)) 
+                    loop (ctx)) 
     
     type LogStore(path, name, runId, startedOn) =
         let agent = Internal.agent path name runId startedOn

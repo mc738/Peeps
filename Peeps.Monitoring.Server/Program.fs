@@ -14,7 +14,7 @@ open Peeps.Core
 open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Logger
-open Peeps.Sqlite
+open Peeps.Store
 
 [<RequireQualifiedAccess>]
 module Routes =
@@ -141,14 +141,12 @@ let main argv =
         LiveView.sendMessageToSockets (System.Text.Json.JsonSerializer.Serialize message)
         |> Async.RunSynchronously
 
-    let dbWriter =
-        DbWriter("C:\\ProjectData\\WSTest\\logs", "peeps-test")
-
+    let runId = Guid.NewGuid()
     use client = new HttpClient()
 
     let actions =
         [ Actions.writeToConsole
-          Actions.writeToDb dbWriter
+          Actions.writeToStore <| LogStore("C:\\ProjectData\\WSTest\\logs", "peeps-test", runId, DateTime.UtcNow)
           liveView
           //Actions.httpPost client "http://localhost:5000/message"
           ]

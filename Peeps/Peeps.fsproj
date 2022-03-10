@@ -12,8 +12,6 @@
     <ItemGroup>
         <Compile Include="Core.fs" />
         <Compile Include="Logger.fs" />
-        <Compile Include="Sqlite.fs" />
-        <Compile Include="PeepsLogger.fs" />
         <Compile Include="Store.fs" />
         <Compile Include="Extensions.fs" />
         <Compile Include="Actions.fs" />
