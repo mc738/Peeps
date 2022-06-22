@@ -9,6 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="DataStores\Common.fs" />
+        <Compile Include="DataStores\MySql\Persistence.fs" />
+        <Compile Include="DataStores\Sqlite\Store.fs" />
         <Compile Include="Core.fs" />
         <Compile Include="HealthChecks.fs" />
         <Compile Include="AppStreams.fs" />
@@ -22,7 +25,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Freql.Sqlite" Version="0.4.1" />
+      <PackageReference Include="Freql.MySql" Version="0.5.1" />
+      <PackageReference Include="Freql.Sqlite" Version="0.5.1" />
       <PackageReference Include="Giraffe" Version="5.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
     </ItemGroup>

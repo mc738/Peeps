@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Net.Http
+open Freql.Sqlite
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
@@ -14,6 +15,7 @@ open Peeps
 open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Logger
+open Peeps.Monitoring.DataStores
 open Peeps.Store
 
 [<RequireQualifiedAccess>]
@@ -115,18 +117,18 @@ let configureApp (app: IApplicationBuilder) =
        .UseGiraffe webApp
 
 
-let saveErrorToFile (response: ResponsePost) (ex: exn) =
-    File.WriteAllText($"C:\\ProjectData\\Peeps\\errors\\{DateTime.UtcNow:yyyyMMddHHmmss}_{response.CorrelationReference}.error", ex.ToString())
+//let saveErrorToFile (response: ResponsePost) (ex: exn) =
+//    File.WriteAllText($"C:\\ProjectData\\Peeps\\errors\\{DateTime.UtcNow:yyyyMMddHHmmss}_{response.CorrelationReference}.error", ex.ToString())
 
-let criticalHandlers = [
-    saveErrorToFile
-]
+//let criticalHandlers = [
+//    saveErrorToFile
+//]
 
-let configureServices (store: LogStore) (services: IServiceCollection) =
+let configureServices (store: LogStore) (metricsCfg: MonitoringStoreConfiguration) (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsLogStore(store)
-        .AddPeepsMonitorAgent(store.Path, criticalHandlers)
+        .AddPeepsMonitorAgent(metricsCfg)
         .AddPeepsRateLimiting(10)
         .AddGiraffe() |> ignore
     
@@ -153,6 +155,8 @@ let main argv =
         
         let logStore = LogStore(path, "test_api", runId, startedOn)
         
+        let metricsStore = SqliteContext.Create(Path.Combine(path, $"test_api-metrics-{runId}.db"))
+        
         use client = new HttpClient()
 
         let actions =
@@ -162,6 +166,8 @@ let main argv =
               //Actions.httpPost client "http://localhost:5000/message"
               ]
 
+        let monitoringCfg = Monitoring.DataStores.Sqlite.Store.config metricsStore
+        
         // Set up the Peeps context.
         let peepsCtx =
             PeepsContext.Create(AppContext.BaseDirectory, "Test", actions)
@@ -173,7 +179,7 @@ let main argv =
                     .UseKestrel()
                     .UseUrls("http://0.0.0.0:20999;https://0.0.0.0:21000;")
                     .Configure(configureApp)
-                    .ConfigureServices(configureServices logStore)
+                    .ConfigureServices(configureServices logStore monitoringCfg)
                     .ConfigureLogging(configureLogging peepsCtx)
                 |> ignore)
             .Build()

@@ -55,18 +55,9 @@ module Extensions =
         member builder.AddPeepsLogStore(store: LogStore) =
             builder.AddSingleton<LogStore>(store)
         
-        /// Use peeps monitoring agent with default critical error handler(s).
-        /// Currently that includes save a copy of the error to the path provided.
-        /// These take the form are [dateTime]_[corrId].error
-        member builder.AddPeepsMonitorAgent(path) =
-            let saveErrorToFile (response: ResponsePost) (ex: exn) =
-                File.WriteAllText(Path.Combine(path, $"{DateTime.UtcNow:yyyyMMddHHmmss}_{response.CorrelationReference}.error"), ex.ToString())
-            
-            builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path, [ saveErrorToFile ]))
-            
         /// Use peeps monitoring agent with a bespoke set of critical handlers.
-        member builder.AddPeepsMonitorAgent(path, criticalHandlers) =
-            builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(path, criticalHandlers))
+        member builder.AddPeepsMonitorAgent(cfg) =
+            builder.AddSingleton<PeepsMonitorAgent>(fun _ -> PeepsMonitorAgent(cfg))
             
         member builder.AddPeepsRateLimiting(limit) =
             builder.AddSingleton<RateLimitingAgent>(fun _ -> RateLimitingAgent(limit))

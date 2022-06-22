@@ -2,7 +2,6 @@
 
 open System
 open System.IO
-open System.IO
 open Freql.Sqlite
 open Peeps.Core
 

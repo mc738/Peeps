@@ -51,7 +51,7 @@ type Logger(name: string, config: LoggerConfig) =
                 let item =
                     PeepsLogItem.Create(logLevel, name, message)
                 
-                config.Actions |> List.map (fun a -> a item) |> ignore
+                config.Actions |> List.iter (fun a -> a item)
             | false -> () // Do nothing.
 
 type LoggerProvider(config: LoggerConfig) =
