@@ -3,17 +3,23 @@
 open System
 open System.IO
 open System.Net.Http
+open Freql.MySql
+open Freql.Sqlite
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Giraffe
 open Peeps
+
+
 open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Logger
+open Peeps.Monitoring.DataStores
 open Peeps.Store
 
 [<RequireQualifiedAccess>]
@@ -115,18 +121,20 @@ let configureApp (app: IApplicationBuilder) =
        .UseGiraffe webApp
 
 
-let saveErrorToFile (response: ResponsePost) (ex: exn) =
-    File.WriteAllText($"C:\\ProjectData\\Peeps\\errors\\{DateTime.UtcNow:yyyyMMddHHmmss}_{response.CorrelationReference}.error", ex.ToString())
+//let saveErrorToFile (response: ResponsePost) (ex: exn) =
+//    File.WriteAllText($"C:\\ProjectData\\Peeps\\errors\\{DateTime.UtcNow:yyyyMMddHHmmss}_{response.CorrelationReference}.error", ex.ToString())
 
-let criticalHandlers = [
-    saveErrorToFile
-]
+//let criticalHandlers = [
+//    saveErrorToFile
+//]
 
-let configureServices (store: LogStore) (services: IServiceCollection) =
+let configureServices (store: LogStore) (metricsCfg: MonitoringStoreConfiguration) (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsLogStore(store)
-        .AddPeepsMonitorAgent(store.Path, criticalHandlers)
+        .AddPeepsMonitorAgent(metricsCfg)
+        //.AddScoped()
+        //.AddMySqlLogStore()
         .AddPeepsRateLimiting(10)
         .AddGiraffe() |> ignore
     
@@ -153,15 +161,26 @@ let main argv =
         
         let logStore = LogStore(path, "test_api", runId, startedOn)
         
+        // Sqlite
+        //let metricsStore = SqliteContext.Create(Path.Combine(path, $"test_api-metrics-{runId}.db"))
+        
         use client = new HttpClient()
 
+        let cs = Environment.GetEnvironmentVariable("PEEPS_LOGGING_CONNECTION_STRING")
+    
         let actions =
             [ Actions.writeToConsole
               Actions.writeToStore logStore
               LiveView.logAction
+              DataStores.MySql.LogStore.action cs
               //Actions.httpPost client "http://localhost:5000/message"
               ]
 
+        // Sqlite metric store
+        //let monitoringCfg = Monitoring.DataStores.Sqlite.Store.config metricsStore
+        
+        let monitoringCfg = Monitoring.DataStores.MySql.Store.config cs
+        
         // Set up the Peeps context.
         let peepsCtx =
             PeepsContext.Create(AppContext.BaseDirectory, "Test", actions)
@@ -173,7 +192,7 @@ let main argv =
                     .UseKestrel()
                     .UseUrls("http://0.0.0.0:20999;https://0.0.0.0:21000;")
                     .Configure(configureApp)
-                    .ConfigureServices(configureServices logStore)
+                    .ConfigureServices(configureServices logStore monitoringCfg)
                     .ConfigureLogging(configureLogging peepsCtx)
                 |> ignore)
             .Build()
