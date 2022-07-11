@@ -2,10 +2,12 @@
 
 open System
 open System.IO
+open Freql.MySql
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Diagnostics.HealthChecks
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Diagnostics.HealthChecks
+open Peeps.Monitoring.DataStores.MySql.Store
 open Peeps.Monitoring.HealthChecks
 open Peeps.Monitoring.Middleware
 open Peeps.Monitoring.RateLimiting
@@ -61,3 +63,6 @@ module Extensions =
             
         member builder.AddPeepsRateLimiting(limit) =
             builder.AddSingleton<RateLimitingAgent>(fun _ -> RateLimitingAgent(limit))
+            
+        member builder.AddMySqlLogStore() =
+            builder.AddScoped<MySqlLogStore>()

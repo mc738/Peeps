@@ -11,6 +11,8 @@
     <ItemGroup>
         <Compile Include="DataStores\Common.fs" />
         <Compile Include="DataStores\MySql\Persistence.fs" />
+        <Compile Include="DataStores\MySql\Store.fs" />
+        <Compile Include="DataStores\MySql\LogStore.fs" />
         <Compile Include="DataStores\Sqlite\Store.fs" />
         <Compile Include="Core.fs" />
         <Compile Include="HealthChecks.fs" />

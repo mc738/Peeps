@@ -3,15 +3,19 @@
 open System
 open System.IO
 open System.Net.Http
+open Freql.MySql
 open Freql.Sqlite
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Giraffe
 open Peeps
+
+
 open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Logger
@@ -129,6 +133,8 @@ let configureServices (store: LogStore) (metricsCfg: MonitoringStoreConfiguratio
         //.UseGiraffeErrorHandler(errorHandler)
         .AddPeepsLogStore(store)
         .AddPeepsMonitorAgent(metricsCfg)
+        //.AddScoped()
+        //.AddMySqlLogStore()
         .AddPeepsRateLimiting(10)
         .AddGiraffe() |> ignore
     
@@ -155,18 +161,25 @@ let main argv =
         
         let logStore = LogStore(path, "test_api", runId, startedOn)
         
-        let metricsStore = SqliteContext.Create(Path.Combine(path, $"test_api-metrics-{runId}.db"))
+        // Sqlite
+        //let metricsStore = SqliteContext.Create(Path.Combine(path, $"test_api-metrics-{runId}.db"))
         
         use client = new HttpClient()
 
+        let cs = Environment.GetEnvironmentVariable("PEEPS_LOGGING_CONNECTION_STRING")
+    
         let actions =
             [ Actions.writeToConsole
               Actions.writeToStore logStore
               LiveView.logAction
+              DataStores.MySql.LogStore.action cs
               //Actions.httpPost client "http://localhost:5000/message"
               ]
 
-        let monitoringCfg = Monitoring.DataStores.Sqlite.Store.config metricsStore
+        // Sqlite metric store
+        //let monitoringCfg = Monitoring.DataStores.Sqlite.Store.config metricsStore
+        
+        let monitoringCfg = Monitoring.DataStores.MySql.Store.config cs
         
         // Set up the Peeps context.
         let peepsCtx =
