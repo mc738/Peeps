@@ -1,0 +1,106 @@
+{
+    "name": "Peeps",
+    "outputDirectory": "docs",
+    "args": [
+        {
+            "name": "root",
+            "default": "../../",
+            "required": true
+        },
+        {
+            "name": "css_root",
+            "default": "../../css",
+            "required": true
+        },
+        {
+            "name": "js_root",
+            "default": "../../js",
+            "required": true
+        }
+    ],
+    "metadata": [
+        {
+            "key": "repo_url",
+            "value": "https://github.com/mc738/Peeps"
+        },
+        {
+            "key": "home_link",
+            "value": "@root"
+        },
+        {
+            "key": "css_root",
+            "value": "@css_root"
+        },
+        {
+            "key": "js_root",
+            "value": "@js_root"
+        }
+    ],
+    "directories": [
+        "css",
+        "js",
+        "img"
+    ],
+    "resources": [
+        {
+            "name": "style.css",
+            "outputPath": "css\\style.css"
+        },
+        {
+            "name": "index.js",
+            "outputPath": "js\\index.js"
+        },
+        {
+            "name": "prism.js",
+            "outputPath": "js\\prism.js"
+        },
+        {
+            "name": "prism.css",
+            "outputPath": "css\\prism.css"
+        }
+    ],
+    "sections": [
+        {
+            "title": "Documents",
+            "type": "articles",
+            "regexIgnore": "Internal",
+            "template": "article",
+            "items": [
+                "docs\\Overview.md",
+                "docs\\Setup.md",
+                "docs\\Examples.md"
+            ]
+        },
+        {
+            "title": "Peeps",
+            "type": "fsharp_code_documents",
+            "regexIgnore": "Internal",
+            "template": "fsharp_code_doc",
+            "items": [
+                "Peeps\\Core.fs",
+                "Peeps\\Logger.fs",
+                "Peeps\\Store.fs",
+                "Peeps\\Extensions.fs",
+                "Peeps\\Actions.fs"
+            ]
+        },
+        {
+            "title": "Peeps.Monitoring",
+            "type": "fsharp_code_documents",
+            "regexIgnore": "Internal",
+            "template": "fsharp_code_doc",
+            "items": [
+                "Peeps.Monitoring\\AppStreams.fs",
+                "Peeps.Monitoring\\Core.fs",
+                "Peeps.Monitoring\\Extensions.fs",
+                "Peeps.Monitoring\\HealthChecks.fs",
+                "Peeps.Monitoring\\LiveView.fs",
+                "Peeps.Monitoring\\Metrics.fs",
+                "Peeps.Monitoring\\Middleware.fs",
+                "Peeps.Monitoring\\RateLimiting.fs",
+                "Peeps.Monitoring\\Routes.fs",
+                "Peeps.Monitoring\\Tools.fs"
+            ]
+        }
+    ]
+}
