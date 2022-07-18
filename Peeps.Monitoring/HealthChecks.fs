@@ -2,13 +2,13 @@
 
 open System
 open System.IO
-open System.Net.Http
 open System.Text
 open System.Text.Json
 open System.Threading.Tasks
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Diagnostics.HealthChecks
 
+/// <summary>Standardized Peeps health checks for us in ASP.NET applications</summary>
 module HealthChecks =
 
     [<RequireQualifiedAccess>]
@@ -55,17 +55,18 @@ module HealthChecks =
             let json = Encoding.UTF8.GetString(ms.ToArray())
             context.Response.WriteAsync(json)
 
+    /// <summary>Health check to monitor the amount of memory an application is using.</summary>
     type PeepsMemoryHealthCheck(total) =
 
         interface IHealthCheck with
 
+            /// <summary>Run the health check.</summary>
+            /// <param name="context">The HealthCheckContext.</param>
+            /// <param name="cancellationToken">A cancellation token.</param>
+            /// <returns>A task that represents the asynchronous HealthCheckResult.</returns>
             member this.CheckHealthAsync(context, cancellationToken) =
                 let allocated = GC.GetTotalMemory(false)
                 let totalAllocated = GC.GetTotalAllocatedBytes(false)
-
-                //Microsoft.AspNetCore.Hosting
-                //
-                //System.Diagnostics.Tracing.Even
 
                 let data =
                     [ "allocatedBytes", box allocated
@@ -85,16 +86,28 @@ module HealthChecks =
                     $"Reports degraded status if allocated bytes when allocated bytes is above {total}."
 
                 Task.FromResult(HealthCheckResult(status, desc, data = data))
-                
+             
+        /// <summary>The health check's tags</summary>
+        /// <returns>A array of string tags for the health check.</returns>
         static member Tags = [| "diagnostic"; "memory"; "internal"; "full" |]
         
+        /// <summary>The health check's name.</summary>
+        /// <returns>A array of string tags for the health check.</returns>
         static member Name = "memory"
         
+        /// <summary>The health check's failure status.</summary>
+        /// <returns>HealthStatus.Unhealthy</returns>
         static member FailureStatus = HealthStatus.Unhealthy
 
+    /// <summary>Health check to monitor how long an application has been running.</summary>
     type PeepsUptimeHealthCheck(maxRunTime, startTime: DateTime) =
 
         interface IHealthCheck with
+        
+            /// <summary>Run the health check.</summary>
+            /// <param name="context">The HealthCheckContext.</param>
+            /// <param name="cancellationToken">A cancellation token.</param>
+            /// <returns>A task that represents the asynchronous HealthCheckResult.</returns>
             member this.CheckHealthAsync(context, cancellationToken) =
 
                 let uptime = (DateTime.UtcNow - startTime).Minutes
@@ -114,10 +127,16 @@ module HealthChecks =
 
                 Task.FromResult(HealthCheckResult(status, desc, data = data))
 
+        /// <summary>The health check's tags</summary>
+        /// <returns>A array of string tags for the health check.</returns>
         static member Tags = [| "diagnostic"; "internal"; "basic" |]
         
+        /// <summary>The health check's name.</summary>
+        /// <returns>A array of string tags for the health check.</returns>
         static member Name = "uptime"
         
+        /// <summary>The health check's failure status.</summary>
+        /// <returns>HealthStatus.Unhealthy</returns>
         static member FailureStatus = HealthStatus.Unhealthy
             
        

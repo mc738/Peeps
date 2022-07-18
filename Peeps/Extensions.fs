@@ -11,6 +11,9 @@ module Extensions =
 
         type ILoggingBuilder with
 
+            /// <summary>An extension to add Peeps to a ILoggingBuilder.</summary>
+            /// <param name="ctx">The PeepsContext.</param>
+            /// <returns>The updated ILoggingBuilder.</returns>
             member builder.AddPeeps(ctx : PeepsContext) =
                 [ LoggerConfig.InfoConfig(ctx.Actions, 0)
                   LoggerConfig.DebugConfig(ctx.Actions, 0)

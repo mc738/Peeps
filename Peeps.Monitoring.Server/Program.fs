@@ -15,6 +15,7 @@ open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Logger
 open Peeps.Store
+open Peeps.Monitoring.Metrics
 
 [<RequireQualifiedAccess>]
 module Routes =
@@ -95,7 +96,7 @@ let configureApp (app: IApplicationBuilder) =
 let configureServices (services: IServiceCollection) =
     services
         //.UseGiraffeErrorHandler(errorHandler)
-        .AddPeepsMonitorAgent("C:\\ProjectData\\WSTest", [])
+        //.AddPeepsMonitorAgent("C:\\ProjectData\\WSTest", [])
         .AddGiraffe() |> ignore
     
     services.AddHealthChecks()
