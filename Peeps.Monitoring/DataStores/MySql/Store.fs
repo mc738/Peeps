@@ -19,6 +19,7 @@ module Store =
            ExecutionTime = None }: Parameters.NewRequest)
         |> Operations.insertRequest ctx
         |> ignore
+        ctx.Close()
 
     let saveResponse (ctx: MySqlContext) (response: ResponsePost) =
         ctx.ExecuteAnonNonQuery(
@@ -29,6 +30,8 @@ module Store =
               response.CorrelationReference.ToString("n") ]
         )
         |> ignore
+        ctx.Close()
+
 
     let saveCritical (ctx: MySqlContext) (response: ResponsePost) (exn: Exception) =
         saveResponse ctx response
@@ -37,6 +40,8 @@ module Store =
            Message = exn.Message }: Parameters.NewCritical)
         |> Operations.insertCritical ctx
         |> ignore
+        ctx.Close()
+
 
     let config (connectionString: string) =
         { MetricsInitialization = fun _ -> ()

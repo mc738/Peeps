@@ -114,7 +114,7 @@ module Store =
             agent.Post(Internal.StoreAgentMessage.LogItem item)
             
         /// <summary>Shut down the log store.</summary>
-        /// <returns>Nothing.</summary>
+        /// <returns>Nothing.</returns>
         member ls.Shutdown() =
             agent.PostAndReply(Internal.StoreAgentMessage.Shutdown)
          
@@ -123,7 +123,7 @@ module Store =
         member ls.ItemCount() =
             agent.PostAndReply(fun rc -> Internal.StoreAgentMessage.ItemCount rc)
             
-        /// <summary>Get the time the log store was started on.<summary>
+        /// <summary>Get the time the log store was started on.</summary>
         /// <returns>A DateTime representing when the store was started.</returns>
         member ls.StartedOn = startedOn
         
