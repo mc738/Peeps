@@ -74,7 +74,7 @@
         {
             "title": "Peeps",
             "type": "fsharp_code_documents",
-            "regexIgnore": "Internal",
+            "regexIgnore": "Internal|Extensions",
             "template": "fsharp_code_doc",
             "items": [
                 "Peeps\\Core.fs",
@@ -87,7 +87,7 @@
         {
             "title": "Peeps.Monitoring",
             "type": "fsharp_code_documents",
-            "regexIgnore": "Internal",
+            "regexIgnore": "Internal|Extensions",
             "template": "fsharp_code_doc",
             "items": [
                 "Peeps.Monitoring\\AppStreams.fs",
@@ -100,6 +100,44 @@
                 "Peeps.Monitoring\\RateLimiting.fs",
                 "Peeps.Monitoring\\Routes.fs",
                 "Peeps.Monitoring\\Tools.fs"
+            ]
+        },
+        {
+            "title": "Peeps.Monitoring.DataStores",
+            "type": "fsharp_code_documents",
+            "regexIgnore": "Internal|Extensions",
+            "template": "fsharp_code_doc",
+            "items": [
+                "Peeps.Monitoring\\DataStores\\Common.fs"
+            ]
+        },
+        {
+            "title": "Peeps.Monitoring.DataStores.MySql",
+            "type": "fsharp_code_documents",
+            "regexIgnore": "Internal|Extensions",
+            "template": "fsharp_code_doc",
+            "items": [
+                "Peeps.Monitoring\\DataStores\\MySql\\Persistence.fs",
+                "Peeps.Monitoring\\DataStores\\MySql\\Store.fs",
+                "Peeps.Monitoring\\DataStores\\MySql\\LogStore.fs"
+            ]
+        },
+        {
+            "title": "Peeps.Monitoring.DataStores.Sqlite",
+            "type": "fsharp_code_documents",
+            "regexIgnore": "Internal|Extensions",
+            "template": "fsharp_code_doc",
+            "items": [
+                "Peeps.Monitoring\\DataStores\\Sqlite\\Store.fs"
+            ]
+        },
+        { 
+            "title":  "Reports",
+            "type": "reports",
+            "regexIgnore": "",
+            "template": "reports",
+            "items": [
+                "project_report"
             ]
         }
     ]

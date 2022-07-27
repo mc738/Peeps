@@ -1,161 +1,124 @@
 ﻿namespace Peeps.Monitoring
 
-open System
-open Freql.Sqlite
-open Peeps.Monitoring.DataStores
+module Metrics =
 
-type AppMetrics =
-    { Requests: int64
-      Errors: int64
-      Criticals: int64
-      BytesReceived: int64
-      BytesSent: int64 }
+    open System
+    open Peeps.Monitoring.DataStores    
+    
+    type AppMetrics =
+        { Requests: int64
+          Errors: int64
+          Criticals: int64
+          BytesReceived: int64
+          BytesSent: int64 }
 
-(*
-module Internal =
+    [<RequireQualifiedAccess>]
+    type AgentMessage =
+        | Request of RequestPost
+        | Response of ResponsePost
+        | Error of ResponsePost
+        | Critical of ResponsePost * exn
+        | GetMetrics of AsyncReplyChannel<AppMetrics>
 
-    let requestsTableSql =
-        """
-    CREATE TABLE requests (
-		correlation_reference TEXT NOT NULL,
-        ip_address TEXT NOT NULL,
-        request_time TEXT NOT NULL,
-		request_size TEXT NOT NULL,
-		url TEXT,
-		response_size TEXT,
-        response_code INTEGER,
-        execution_time INTEGER,
-		CONSTRAINT requests_PK PRIMARY KEY (correlation_reference)
-	);
-    """
+    type AgentState =
+        { //Writer: SqliteContext
+          Requests: int64
+          Errors: int64
+          Criticals: int64
+          BytesReceived: int64
+          BytesSent: int64 }
+        static member Create() =
+            { //Writer = qh
+              Requests = 0L
+              Errors = 0L
+              Criticals = 0L
+              BytesReceived = 0L
+              BytesSent = 0L }
 
-    let saveRequest (qh: SqliteContext) (request: RequestPost) = qh.Insert("requests", request)
+        member s.ToAppMetrics() =
+            ({ Requests = s.Requests
+               Errors = s.Errors
+               Criticals = s.Criticals
+               BytesReceived = s.BytesReceived
+               BytesSent = s.BytesSent }: AppMetrics)
 
-    let saveResponse (qh: SqliteContext) (response: ResponsePost) =
-        let sql =
-            """
-        UPDATE requests
-        SET response_size = @0, response_code = @1, execution_time = @2
-        WHERE correlation_reference = @3
-        """
+    type PeepsMonitorAgent(cfg: MonitoringStoreConfiguration) =
 
-        qh.ExecuteVerbatimNonQueryAnon(
-            sql,
-            [ response.Size
-              response.ResponseCode
-              response.Time
-              response.CorrelationReference ]
-        )
-        |> ignore
-*)
+        let agent =
+            MailboxProcessor<AgentMessage>.Start
+                (fun inbox ->
+                    let rec loop (state) =
+                        async {
+                            let! msg = inbox.Receive()
 
-[<RequireQualifiedAccess>]
-type AgentMessage =
-    | Request of RequestPost
-    | Response of ResponsePost
-    | Error of ResponsePost
-    | Critical of ResponsePost * exn
-    | GetMetrics of AsyncReplyChannel<AppMetrics>
+                            let newState =
+                                match msg with
+                                | AgentMessage.Request r ->
+                                    cfg.SaveRequest r
 
-type AgentState =
-    { //Writer: SqliteContext
-      Requests: int64
-      Errors: int64
-      Criticals: int64
-      BytesReceived: int64
-      BytesSent: int64 }
-    static member Create() =
-        { //Writer = qh
-          Requests = 0L
-          Errors = 0L
-          Criticals = 0L
-          BytesReceived = 0L
-          BytesSent = 0L }
+                                    ({ state with
+                                        Requests = state.Requests + 1L
+                                        BytesReceived = state.BytesReceived + r.RequestSize }: AgentState)
+                                | AgentMessage.Response r ->
+                                    cfg.SaveResponse r
 
-    member s.ToAppMetrics() =
-        ({ Requests = s.Requests
-           Errors = s.Errors
-           Criticals = s.Criticals
-           BytesReceived = s.BytesReceived
-           BytesSent = s.BytesSent }: AppMetrics)
+                                    { state with BytesSent = state.BytesSent + r.Size }
+                                | AgentMessage.Error r ->
+                                    cfg.SaveResponse r
 
-type PeepsMonitorAgent(cfg: MonitoringStoreConfiguration) =
+                                    { state with
+                                        Errors = state.Errors + 1L
+                                        BytesSent = state.BytesSent + r.Size }
+                                | AgentMessage.Critical (r, exn) ->
+                                    cfg.CriticalHandlers
+                                    |> List.iter (fun h -> h r exn)
 
-    let agent =
-        MailboxProcessor<AgentMessage>.Start
-            (fun inbox ->
-                let rec loop (state) =
-                    async {
-                        let! msg = inbox.Receive()
+                                    { state with
+                                        Errors = state.Criticals + 1L
+                                        BytesSent = state.BytesSent + r.Size }
+                                | AgentMessage.GetMetrics rc ->
+                                    state.ToAppMetrics() |> rc.Reply
+                                    state
 
-                        let newState =
-                            match msg with
-                            | AgentMessage.Request r ->
-                                cfg.SaveRequest r
+                            return! loop (newState)
+                        }
+                        
+                    cfg.MetricsInitialization ()
+                    loop (AgentState.Create()))
 
-                                ({ state with
-                                    Requests = state.Requests + 1L
-                                    BytesReceived = state.BytesReceived + r.RequestSize }: AgentState)
-                            | AgentMessage.Response r ->
-                                cfg.SaveResponse r
+        member _.SaveRequest(correlationRef: Guid, ipAddress: string, size: int64, url: string) =
+            { CorrelationReference = correlationRef
+              IpAddress = ipAddress
+              RequestTime = DateTime.UtcNow
+              RequestSize = size
+              Url = url }
+            |> AgentMessage.Request
+            |> agent.Post
 
-                                { state with BytesSent = state.BytesSent + r.Size }
-                            | AgentMessage.Error r ->
-                                cfg.SaveResponse r
+        member _.SaveResponse(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
+            { CorrelationReference = correlationRef
+              Size = size
+              ResponseCode = responseCode
+              Time = time }
+            |> AgentMessage.Response
+            |> agent.Post
 
-                                { state with
-                                    Errors = state.Errors + 1L
-                                    BytesSent = state.BytesSent + r.Size }
-                            | AgentMessage.Critical (r, exn) ->
-                                cfg.CriticalHandlers
-                                |> List.iter (fun h -> h r exn)
+        member _.SaveError(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
+            { CorrelationReference = correlationRef
+              Size = size
+              ResponseCode = responseCode
+              Time = time }
+            |> AgentMessage.Error
+            |> agent.Post
 
-                                { state with
-                                    Errors = state.Criticals + 1L
-                                    BytesSent = state.BytesSent + r.Size }
-                            | AgentMessage.GetMetrics rc ->
-                                state.ToAppMetrics() |> rc.Reply
-                                state
+        member _.SaveCritical(correlationRef: Guid, size: int64, responseCode: int, time: int64, exn: Exception) =
+            ({ CorrelationReference = correlationRef
+               Size = size
+               ResponseCode = responseCode
+               Time = time },
+             exn)
+            |> AgentMessage.Critical
+            |> agent.Post
 
-                        return! loop (newState)
-                    }
-                    
-                cfg.MetricsInitialization ()
-                loop (AgentState.Create()))
-
-    member _.SaveRequest(correlationRef: Guid, ipAddress: string, size: int64, url: string) =
-        { CorrelationReference = correlationRef
-          IpAddress = ipAddress
-          RequestTime = DateTime.UtcNow
-          RequestSize = size
-          Url = url }
-        |> AgentMessage.Request
-        |> agent.Post
-
-    member _.SaveResponse(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
-        { CorrelationReference = correlationRef
-          Size = size
-          ResponseCode = responseCode
-          Time = time }
-        |> AgentMessage.Response
-        |> agent.Post
-
-    member _.SaveError(correlationRef: Guid, size: int64, responseCode: int, time: int64) =
-        { CorrelationReference = correlationRef
-          Size = size
-          ResponseCode = responseCode
-          Time = time }
-        |> AgentMessage.Error
-        |> agent.Post
-
-    member _.SaveCritical(correlationRef: Guid, size: int64, responseCode: int, time: int64, exn: Exception) =
-        ({ CorrelationReference = correlationRef
-           Size = size
-           ResponseCode = responseCode
-           Time = time },
-         exn)
-        |> AgentMessage.Critical
-        |> agent.Post
-
-    member _.GetMetrics() =
-        agent.PostAndReply<AppMetrics>(fun rc -> AgentMessage.GetMetrics rc)
+        member _.GetMetrics() =
+            agent.PostAndReply<AppMetrics>(fun rc -> AgentMessage.GetMetrics rc)

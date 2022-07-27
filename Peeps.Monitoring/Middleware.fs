@@ -1,15 +1,16 @@
 ﻿namespace Peeps.Monitoring
 
-open System
-open System.Diagnostics
-open System.Threading.Tasks
-open Microsoft.AspNetCore.Http
-open Giraffe
-open Microsoft.Extensions.Logging
-open Peeps.Monitoring.RateLimiting
-
 module Middleware =
 
+    open System
+    open System.Diagnostics
+    open System.Threading.Tasks
+    open Microsoft.AspNetCore.Http
+    open Giraffe
+    open Microsoft.Extensions.Logging
+    open Peeps.Monitoring.Metrics
+    open Peeps.Monitoring.RateLimiting
+    
     type PeepsMonitorMiddleware(next: RequestDelegate) =
 
         member _.Invoke(ctx: HttpContext) =

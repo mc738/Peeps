@@ -20,6 +20,7 @@ open Peeps.Extensions
 open Peeps.Monitoring
 open Peeps.Logger
 open Peeps.Monitoring.DataStores
+open Peeps.Monitoring.Metrics
 open Peeps.Store
 
 [<RequireQualifiedAccess>]

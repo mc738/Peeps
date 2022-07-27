@@ -18,4 +18,6 @@ module LogStore =
          }: Parameters.NewLogItem)
         |> Operations.insertLogItem ctx 
         |> ignore
+        
+        ctx.Close()
 

@@ -1,21 +1,19 @@
 ﻿namespace Peeps.Monitoring
 
-open System
-open System.IO
-open Freql.MySql
-open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Diagnostics.HealthChecks
-open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.Diagnostics.HealthChecks
-open Peeps.Monitoring.DataStores.MySql.Store
-open Peeps.Monitoring.HealthChecks
-open Peeps.Monitoring.Middleware
-open Peeps.Monitoring.RateLimiting
-open Peeps.Store
-
 [<AutoOpen>]
 module Extensions =
-    
+
+    open System
+    open Microsoft.AspNetCore.Builder
+    open Microsoft.AspNetCore.Diagnostics.HealthChecks
+    open Microsoft.Extensions.DependencyInjection
+    open Peeps.Monitoring.DataStores.MySql.Store
+    open Peeps.Monitoring.HealthChecks
+    open Peeps.Monitoring.Metrics
+    open Peeps.Monitoring.Middleware
+    open Peeps.Monitoring.RateLimiting
+    open Peeps.Store
+        
     type IHealthChecksBuilder with
         
         member builder.AddPeepsHealthChecks(maxSize: int64, maxRunTimeMinutes: int, startTime: DateTime) =

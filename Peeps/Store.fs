@@ -103,26 +103,40 @@ module Store =
                         }
                     // Get the connection and start listening.
                     loop (ctx)) 
-    
+   
+    /// <summary>An Sqlite-based log store.</summary>
     type LogStore(path, name, runId, startedOn) =
         let agent = Internal.agent path name runId startedOn
         
+        /// <summary>Add a log item.</summary>
+        /// <param name="item">A PeepsLogItem to be saved.</param>
         member ls.AddItem(item: PeepsLogItem) =
             agent.Post(Internal.StoreAgentMessage.LogItem item)
             
+        /// <summary>Shut down the log store.</summary>
+        /// <returns>Nothing.</returns>
         member ls.Shutdown() =
             agent.PostAndReply(Internal.StoreAgentMessage.Shutdown)
          
+        /// <summary>Get the number of log items in the store.</summary>
+        /// <returns>The number of items.</returns>
         member ls.ItemCount() =
             agent.PostAndReply(fun rc -> Internal.StoreAgentMessage.ItemCount rc)
             
+        /// <summary>Get the time the log store was started on.</summary>
+        /// <returns>A DateTime representing when the store was started.</returns>
         member ls.StartedOn = startedOn
         
+        /// <summary>Get the run id of the log store.</summary>
+        /// <returns>The log store's run id as a Guid.</returns>
         member ls.RunId = runId
         
+        /// <summary>Get the path of the log store.</summary>
+        /// <returns>The log store's path.</returns>
         member ls.Path = path
         
-        /// Send a ping message to the agent and wait upto 5 seconds for a response.
+        /// <summary>Send a ping message to the agent and wait upto 5 seconds for a response.</summary>
+        /// <returns>A unit if successful, if not an error message.</returns>
         member ls.CheckConnection() =
             match agent.TryPostAndReply(Internal.StoreAgentMessage.Ping, timeout = 5000) with
             | Some _ -> Ok ()

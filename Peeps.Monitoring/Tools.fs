@@ -4,8 +4,7 @@ open System.Net.Http
 open System.Text.Json
 
 module Tools =
-    
-    
+   
     module HttpHelpers =
         
         let getString (url: string) (client: HttpClient) =

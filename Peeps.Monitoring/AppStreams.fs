@@ -7,19 +7,26 @@ open System.Security.Principal
 open System.Text
 open System.Threading
 
-/// App streams (currently) 
+/// <summary>App streams are a way to stream diagnostic information out of applications.</summary>
 module AppStreams =
 
+    /// <summary>Magic bytes used at the start of an app steam message header.<summary>
+    /// <returns>An array containing the bytes 14 and 6.</returns>
     let magicBytes = [| 14uy; 6uy |]
 
-
+    /// <summary>A app stream message header.</summary>
     type MessageHeader =
         { UserDefinedField1: byte
           UserDefinedField2: byte
           Length: int }
 
+        /// <summary>The header length.</summary>
+        /// <returns>8</summary>
         static member HeaderLength = 8
 
+        /// <summary>Create an app stream message header.</summary>
+        /// <param name="length">The length of the message.</param>
+        /// <returns>A new MessageHeader.</returns>
         static member Create(length: int) =
             {
                 UserDefinedField1 = 1uy
@@ -27,6 +34,9 @@ module AppStreams =
                 Length = length
             }
         
+        /// <summary>Try and parse a message header from a byte array.</summary>
+        /// <param name="buffer">The byte array to try and parse the header from.</param>
+        /// <returns>A result containing the MessageHeader if successfully parsed ot an error message if not.</returns>
         static member TryParse(buffer: byte array) =
             match buffer.Length >= 8 with
             | true ->
@@ -42,6 +52,8 @@ module AppStreams =
                 | false -> Error "Magic bytes do not match."
             | false -> Error $"Buffer is too short (length: {buffer.Length})"
 
+        /// <summary>Serialize a message header to a byte array</summary>
+        /// <returns>The serialized header as a byte array.</returns>
         member mh.Serialize() =
             Array.concat [ magicBytes
                            [| mh.UserDefinedField1
@@ -181,5 +193,3 @@ module AppStreams =
             Console.WriteLine("Connecting to server...\n")
             pipeClient.Connect()
             Writer.start (id.ToString()) pipeClient
-            
-    
