@@ -123,7 +123,7 @@ module Logger =
         
         /// <summary>Create a new PeepsContext.</summary>
         /// <param name="outputDirectory">The base output directory.</param>
-        /// <param name="name">The application's name.<param>
+        /// <param name="name">The application's name.</param>
         /// <param name="actions">A list of LogAction's to be run when an item is received.</param>
         static member Create(outputDirectory, name, actions) =
             { Name = name
