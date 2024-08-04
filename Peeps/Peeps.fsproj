@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
         <Authors>Max Clifford</Authors>
         <Description>A simple F# loggger.</Description>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageProjectUrl>https://github.com/mc738/Peeps</PackageProjectUrl>
         <RepositoryUrl>https://github.com/mc738/Peeps</RepositoryUrl>
+        <TargetFrameworks>net5.0;net6.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
