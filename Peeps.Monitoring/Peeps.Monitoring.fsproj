@@ -27,8 +27,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Freql.MySql" Version="0.5.1" />
-      <PackageReference Include="Freql.Sqlite" Version="0.5.1" />
+      <PackageReference Include="Freql.MySql" Version="0.13.0" />
+      <PackageReference Include="Freql.Sqlite" Version="0.13.0" />
       <PackageReference Include="Giraffe" Version="5.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
     </ItemGroup>
